@@ -1,0 +1,41 @@
+{
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "targets": {
+          "browsers": ["defaults"]
+        },
+        "exclude": ["transform-regenerator"],
+        "loose": true,
+        "modules": "commonjs"
+      }
+    ],
+    "@babel/react",
+    "@babel/typescript"
+  ],
+  "plugins": [
+    "@babel/proposal-class-properties",
+    [
+      "babel-plugin-import",
+      {
+        "libraryName": "antd",
+        "style": "css"
+      }
+    ]
+  ],
+  "env": {
+    "es": {
+      "presets": [
+        [
+          "@babel/env",
+          {
+            "exclude": ["transform-regenerator"],
+            "loose": true,
+            "modules": false
+          }
+        ]
+      ]
+    }
+  }
+}

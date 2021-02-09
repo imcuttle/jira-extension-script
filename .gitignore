@@ -1,0 +1,16 @@
+.idea/
+.DS_Store
+node_modules/
+dist/
+public/
+**/*debug.log
+coverage/
+.entry
+.dist
+.vscode
+lib/
+types/
+es/
+
+lib/
+es/
