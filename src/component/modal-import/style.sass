@@ -1,0 +1,28 @@
+$prefix: jira_modal-import
+
+.#{$prefix}
+  &__import-wrapper
+    display: flex
+    height: 600px
+
+  &__import-left,
+  &__import-right
+    flex: 1
+
+  &__import-left
+    font-size: 15px
+    margin-right: 8px
+  &__import-right
+    overflow: auto
+    margin-left: 8px
+
+    .markdown-body
+      > ul > li
+        &:before
+          color: #1890ff
+          content: "[ISSUE] "
+        > ul > li
+          &:before
+            color: #1890ff
+            content: "[SUB_TASK] "
+
