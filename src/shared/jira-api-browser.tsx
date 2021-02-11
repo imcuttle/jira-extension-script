@@ -2,6 +2,7 @@ import merge from 'lodash.merge'
 import JiraApi from './jira-api'
 import { notification, Typography } from 'antd'
 import React from 'react'
+import cookie from 'js-cookie'
 import url from 'url'
 
 /**
@@ -32,17 +33,123 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
-  _createIssueReqBody({
+  async querySuggestEpics({
+    maxResults = 20,
+    hideDone = true,
+    searchQuery,
+    projectKey = JIRA.API.Projects.getCurrentProjectKey()
+  }: {
+    maxResults?: number
+    hideDone?: boolean
+    searchQuery?: string
+    projectKey?: string
+  }) {
+    return this.request({
+      method: 'get',
+      baseURL: url.format({ host: url.parse(this.axios.defaults.baseURL || '').host, pathname: '' }),
+      url: '/rest/greenhopper/latest/epics',
+      params: {
+        searchQuery,
+        projectKey,
+        maxResults: maxResults,
+        hideDone
+      }
+    })
+  }
+
+  async updateIssue(
+    issue: string,
+    {
+      estimate
+    }: {
+      estimate?: number
+    }
+  ) {
+    const token = cookie.get('atlassian.xsrf.token')
+
+    const data = new FormData();
+    if (estimate != null) {
+      data.append('customfield_10002', estimate as any)
+    }
+    if (token) {
+      data.append('atl_token', token)
+      data.append('rapidViewId', '939')
+    }
+    data.append('issueId', issue)
+    // @ts-ignore
+    data.append('singleFieldEdit', true)
+    // @ts-ignore
+    data.append('skipScreenCheck', true)
+    data.append('fieldsToForcePresent', 'customfield_10002')
+
+    const res = await this.request({
+      method: 'post',
+      baseURL: '',
+      url: '/secure/DetailsViewAjaxIssueAction.jspa?decorator=none',
+      data
+    })
+
+    // this._toastErrors(res.data.errors, { message: 'Failed' }) || this._toastErrors(res.data.errorMessages, { message: 'Failed' })
+
+    if (res.data.issue) {
+      notification.success({
+        message: '更新成功'
+      })
+    } else {
+      notification.error({
+        message: '更新失败'
+      })
+    }
+  }
+
+  async queryIssue(issue: string) {
+    const res = await this.request({
+      method: 'get',
+      url: '/issue/' + issue
+    })
+
+    this._toastErrors(res.data.errors) || this._toastErrors(res.data.errorMessages)
+
+    return res
+  }
+
+  async querySuggestSprints({ query }: { query?: string }) {
+    return this.request({
+      method: 'get',
+      baseURL: url.format({ host: url.parse(this.axios.defaults.baseURL || '').host, pathname: '' }),
+      url: '/rest/greenhopper/latest/sprint/picker',
+      params: {
+        query
+      }
+    })
+  }
+
+  async querySuggestUsers({ showAvatar = true, query }: { showAvatar?: boolean; query?: string }) {
+    return this.request({
+      method: 'get',
+      url: '/user/picker',
+      params: {
+        query,
+        showAvatar
+      }
+    })
+  }
+
+  private _createIssueReqBody({
     estimate,
     priority,
     epicLink,
+    sprint,
     assignee,
+    dod,
     reporter = JIRA.Users.LoggedInUser.userName(),
     ...data
   }: {
     estimate?: number
     reporter?: string
     assignee?: string
+    sprint?: any
+    dod?: any
     epicLink?: any
     summary?: string
     description?: string
@@ -52,6 +159,10 @@ export default class JiraApiBrowser extends JiraApi {
     const config = merge(
       {
         customfield_10002: estimate,
+        customfield_10004: sprint,
+        customfield_10506: dod && {
+          id: dod
+        },
         customfield_10005: epicLink,
         project: {
           key: JIRA.API.Projects.getCurrentProjectKey()
@@ -132,28 +243,23 @@ export default class JiraApiBrowser extends JiraApi {
     }: Parameters<JiraApiBrowser['_createIssueReqBody']>[0] & {
       tasksBody?: Array<Parameters<JiraApiBrowser['_createIssueReqBody']>[0]>
     } = {},
-    { toast = true } = {}
+    { toastSuccess = true } = {}
   ) {
     const res = await this.request({
       method: 'POST',
       url: '/issue/bulk',
       data: {
         issueUpdates: tasksBody.map((body) => ({
-          fields: this._createIssueReqBody({ ...body, ...reqBody })
+          fields: this._createIssueReqBody({ ...reqBody, ...body })
         }))
       }
     })
 
-    if (!toast) {
-      return res
-    }
-
     const issues = res.data.issues
-    if (issues && issues.length) {
+    if (toastSuccess && issues && issues.length) {
       notification.success({
         message: '创建 Jira Issue 成功',
         description: (
-          // key in ("YFDTR-31309", "YFDTR-31322")
           <Typography.Link
             href={url.format({
               pathname: '/issues/',
@@ -165,7 +271,9 @@ export default class JiraApiBrowser extends JiraApi {
           </Typography.Link>
         )
       })
-    } else {
+    }
+
+    if (!issues || !issues.length) {
       notification.error({
         message: '创建 Jira Issue 失败'
       })
@@ -174,7 +282,7 @@ export default class JiraApiBrowser extends JiraApi {
     return res
   }
 
-  _toastErrors(errors, config?) {
+  private _toastErrors(errors, config?) {
     if (!errors) {
       return false
     }

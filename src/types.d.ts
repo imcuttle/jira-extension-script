@@ -6,6 +6,11 @@ declare var JIRA: {
     }
   }
 
+  Issue: {
+    getIssueKey(): string
+    getIssueId(): string
+  }
+
   Users: {
     LoggedInUser: {
       userName(): string

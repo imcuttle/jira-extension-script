@@ -1,7 +1,6 @@
 import React, { useReducer } from 'react'
 import { Button, Dropdown, Menu, Input, Modal, Drawer, Typography, ConfigProvider, notification } from 'antd'
 import p from 'prefix-classname'
-import lodashGet from 'lodash.get'
 import zhCN from 'antd/es/locale/zh_CN'
 
 const cn = p()
@@ -9,8 +8,8 @@ const c = p('jira_portal')
 
 import './style.sass'
 import JiraModalImport from '../modal-import'
+import {isNotReady, useToken} from '../../shared/utils'
 
-// oVAepkVKirY6N4chhxEUyn53An7qWbdM6MYTGP
 const JiraPortal: React.FC<{}> = ({}) => {
   const [state, dispatch] = useReducer(
     (state, action) => {
@@ -23,18 +22,11 @@ const JiraPortal: React.FC<{}> = ({}) => {
           return { ...state, ...action.value }
       }
     },
-    { type: null, visible: true, token: localStorage.getItem('jira:api-token') }
+    { type: null, visible: false }
   )
+  const [token, setToken] = useToken()
 
-  React.useEffect(() => {
-    localStorage.setItem('jira:api-token', state.token)
-  }, [state.token])
-
-  if (
-    typeof JIRA === 'undefined' ||
-    !lodashGet(JIRA, 'Users.LoggedInUser.userName', () => undefined)() ||
-    !lodashGet(JIRA, 'API.Projects.getCurrentProjectKey', () => undefined)()
-  ) {
+  if (isNotReady()) {
     console.error('JIRA defined load failed')
     return null
   }
@@ -67,14 +59,10 @@ const JiraPortal: React.FC<{}> = ({}) => {
             </Typography.Paragraph>
             <Input.Password
               name={'jira-token'}
-              value={state.token}
+              value={token as string}
               placeholder={'Jira Token'}
               onChange={(e) => {
-                dispatch({
-                  value: {
-                    token: e.target.value
-                  }
-                })
+                setToken(e.target.value)
               }}
             />
 
@@ -90,9 +78,11 @@ const JiraPortal: React.FC<{}> = ({}) => {
         </Drawer>
 
         <JiraModalImport
+          zIndex={1010}
           token={state.token}
           visible={state.type === 'import'}
           onCancel={() => dispatch({ type: 'setType', value: null })}
+          title={'石墨 / Markdown 导入'}
         />
       </div>
     </ConfigProvider>

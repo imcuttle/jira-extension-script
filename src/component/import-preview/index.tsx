@@ -20,17 +20,6 @@ const JiraImportPreview = React.forwardRef<
     markdown: string
   }
 >(({ markdown }, ref) => {
-  const [state, dispatch] = useReducer((state, action) => {
-    switch (action.type) {
-      case 'setType':
-        return { ...state, type: action.value }
-      case 'setData':
-        return { ...state, data: action.value }
-      default:
-        return { ...state, ...action.value }
-    }
-  }, {})
-
   const mdast = React.useMemo(() => {
     const node = processor().data('settings', { position: false }).parse(markdown)
     stripMdast(node)

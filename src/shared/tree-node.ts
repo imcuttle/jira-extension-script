@@ -1,5 +1,5 @@
 class TreeNode<T = any> {
-  public data = {}
+  public data: any = {}
   constructor(public value?: T, public children: TreeNode<T>[] = []) {}
   addNode(node?: TreeNode) {
     if (node) {
