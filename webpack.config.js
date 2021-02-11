@@ -9,7 +9,7 @@ module.exports = {
     index: './src/'
   },
   output: {
-    library: '_JiraExtensionScript',
+    library: isDev ? '_JiraExtensionScript' : 'JiraExtensionScript',
     libraryTarget: 'umd',
   },
   devServer: {

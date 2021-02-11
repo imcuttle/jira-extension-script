@@ -6,10 +6,10 @@
   "scripts": {
     "test:watch": "npm test -- --watch",
     "preversion": "npm test",
-    "build": "npm run clean && run-p --print-label \"build:**\"",
+    "build": "npm run clean && NODE_ENV=production webpack",
     "webpack": "webpack serve --disable-host-check",
     "dev": "TSC_OPTIONS=\"--watch\" npm run build",
-    "clean": "rimraf types es lib",
+    "clean": "rimraf dist",
     "prepare": "npm run build",
     "version": "npm run changelog",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
@@ -24,11 +24,6 @@
   "engines": {
     "node": ">=10"
   },
-  "files": [
-    "es",
-    "types",
-    "lib"
-  ],
   "keywords": [
     "余聪",
     "jira",
@@ -36,11 +31,11 @@
     "script",
     "jira-extension-script"
   ],
-  "main": "lib",
-  "types": "types",
+  "main": "dist",
+  "unpkg": "dist/index.js",
+  "jsdelivr": "dist/index.js",
   "license": "MIT",
   "repository": "余聪/jira-extension-script",
-  "module": "es",
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
