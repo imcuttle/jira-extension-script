@@ -135,8 +135,6 @@ const JiraModalImport = React.forwardRef<
         }
 
         const nodes = mdastToTreeNodes(mdast)
-        console.log(mdast, nodes)
-
         const getReqBody = (nodes: TreeNode[]) => ({
           ...form.getFieldsValue(),
           tasksBody: nodes.map((node) => ({
@@ -202,6 +200,9 @@ const JiraModalImport = React.forwardRef<
       width={1200}
     >
       <Spin size={'large'} spinning={loading}>
+        <div style={{ marginBottom: 10 }}>
+          <span style={{ fontSize: 17, fontWeight: 'bold', marginRight: 6 }}>公共配置</span>
+        </div>
         <Form
           initialValues={{
             dod: '10241'
@@ -286,7 +287,7 @@ const JiraModalImport = React.forwardRef<
           </Row>
         </Form>
 
-        <div style={{ marginBottom: 10 }}>
+        <div style={{ marginTop: 6, marginBottom: 10 }}>
           <span style={{ fontSize: 17, fontWeight: 'bold', marginRight: 6 }}>Issue 录入</span>
           <Typography.Link
             href={'https://confluence.zhenguanyu.com/pages/viewpage.action?pageId=127662878'}

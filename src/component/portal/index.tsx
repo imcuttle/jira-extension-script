@@ -60,7 +60,7 @@ const JiraPortal: React.FC<{}> = ({}) => {
             <Input.Password
               name={'jira-token'}
               value={token as string}
-              placeholder={'Jira Token'}
+              placeholder={'请设置 Jira Token'}
               onChange={(e) => {
                 setToken(e.target.value)
               }}
@@ -70,7 +70,7 @@ const JiraPortal: React.FC<{}> = ({}) => {
               <Typography.Text style={{ fontWeight: 'bold', fontSize: 18 }}>工具包</Typography.Text>
             </Typography.Paragraph>
             <Typography.Paragraph>
-              <Button type={'primary'} onClick={() => dispatch({ type: 'setType', value: 'import' })}>
+              <Button disabled={!token} type={'primary'} onClick={() => dispatch({ type: 'setType', value: 'import' })}>
                 石墨 / Markdown 导入
               </Button>
             </Typography.Paragraph>
