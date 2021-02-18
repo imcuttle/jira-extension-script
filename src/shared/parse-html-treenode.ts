@@ -22,7 +22,8 @@ function generateText(domElem: Element) {
 
 function generateTreeNode(domElem, parentTreeNode?: TreeNode) {
   if (domElem.tagName === 'LI') {
-    return new TreeNode(generateText(domElem).trim())
+    const text = generateText(domElem).trim()
+    return text ? new TreeNode(text) : null
   }
 
   const prevTreeNode = parentTreeNode?.children[parentTreeNode.children.length - 1]

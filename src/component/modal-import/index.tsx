@@ -307,8 +307,10 @@ const JiraModalImport = React.forwardRef<
             className={c('__import-left')}
             onPaste={(evt) => {
               const html = evt.clipboardData.getData('text/html')
+              // console.log('html', html);
               if (html) {
                 const treeNode = parseHtmlTreeNode(html)
+                // console.log('treeNode', treeNode);
                 if (treeNode !== false) {
                   const mdast = treeNodeToMdast(treeNode)
                   const mdText = mdastStringify(mdast)
