@@ -5,7 +5,6 @@
   "author": "余聪 <yucong@fenbi.com>",
   "scripts": {
     "test:watch": "npm test -- --watch",
-    "preversion": "npm test",
     "build": "npm run clean && NODE_ENV=production webpack",
     "webpack": "webpack serve --disable-host-check",
     "dev": "TSC_OPTIONS=\"--watch\" npm run build",
