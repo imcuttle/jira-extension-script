@@ -33,6 +33,22 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
+  async setAssignees(dataList) {
+    return Promise.all(
+      dataList.map(({ issueIdOrKey, assignee }) => {
+        return this.setAssignee(issueIdOrKey, assignee)
+      })
+    )
+  }
+
+  async setAssignee(issueIdOrKey, assignee) {
+    return this.request({
+      method: 'put',
+      url: `/issue/${issueIdOrKey}/assignee`,
+      data: assignee
+    })
+  }
+
   async querySuggestEpics({
     maxResults = 20,
     hideDone = true,
@@ -67,7 +83,7 @@ export default class JiraApiBrowser extends JiraApi {
   ) {
     const token = cookie.get('atlassian.xsrf.token')
 
-    const data = new FormData();
+    const data = new FormData()
     if (estimate != null) {
       data.append('customfield_10002', estimate as any)
     }

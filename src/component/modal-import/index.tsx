@@ -35,6 +35,7 @@ import { JiraSuggest } from '../epic-link-suggest'
 import TreeNode from '../../shared/tree-node'
 import url from 'url'
 import treeNodesToConfluence from "../../shared/tree-node-to-confluence";
+import UserSuggest from "../user-suggest";
 
 const JiraModalImport = React.forwardRef<
   {},
@@ -61,26 +62,6 @@ const JiraModalImport = React.forwardRef<
       }),
     [token]
   )
-
-  const userFetcher = async (val) => {
-    const res = await jiraApi.querySuggestUsers({
-      query: val
-    })
-    return res.data.users.map((user) => {
-      return {
-        label: (
-          <span className={c('__user-item')}>
-            <Avatar style={{ width: 20, height: 20, marginRight: 4 }} src={user.avatarUrl} />
-            <span
-              style={{ width: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}
-              dangerouslySetInnerHTML={{ __html: user.html }}
-            />
-          </span>
-        ),
-        value: user.key
-      }
-    }, {})
-  }
 
   const [form] = Form.useForm()
   const [sprintData, setSprintData] = React.useState({})
@@ -275,13 +256,13 @@ const JiraModalImport = React.forwardRef<
           <Row gutter={24}>
             <Col span={8}>
               <Form.Item label="经办人" name="assignee">
-                <JiraSuggest fetcher={userFetcher} />
+                <UserSuggest jiraApi={jiraApi} />
               </Form.Item>
             </Col>
 
             <Col span={8}>
               <Form.Item label="报告人" name="reporter">
-                <JiraSuggest fetcher={userFetcher} />
+                <UserSuggest jiraApi={jiraApi} />
               </Form.Item>
             </Col>
           </Row>
