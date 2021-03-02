@@ -148,9 +148,7 @@ const JiraModalImport = React.forwardRef<
                   parent: {
                     key: issue.key
                   },
-                  issuetype: {
-                    name: '子任务'
-                  },
+                  issuetype: '5',
                   // 子任务不能存在以下属性
                   dod: undefined,
                   sprint: undefined,
