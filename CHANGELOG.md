@@ -1,16 +1,9 @@
-## [1.0.6](https://github.com/余聪/jira-extension-script/compare/v1.0.5...v1.0.6) (2021-03-01)
+## [1.0.7](https://github.com/余聪/jira-extension-script/compare/v1.0.2...v1.0.7) (2021-03-02)
 
 
+### Features
 
-## [1.0.5](https://github.com/余聪/jira-extension-script/compare/v1.0.4...v1.0.5) (2021-03-01)
-
-
-
-## [1.0.4](https://github.com/余聪/jira-extension-script/compare/v1.0.3...v1.0.4) (2021-03-01)
-
-
-
-## [1.0.3](https://github.com/余聪/jira-extension-script/compare/v1.0.2...v1.0.3) (2021-03-01)
+* 支持标签 ([4ff8c0e](https://github.com/余聪/jira-extension-script/commit/4ff8c0e6a5366c9c84651a42736eb1d922a6203a))
 
 
 
