@@ -151,12 +151,24 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
+  async querySuggestLabels(query) {
+    return this.request({
+      method: 'get',
+      baseURL: url.format({ host: url.parse(this.axios.defaults.baseURL || '').host, pathname: '' }),
+      url: '/rest/api/1.0/labels/suggest',
+      params: {
+        query
+      }
+    })
+  }
+
   private _createIssueReqBody({
     estimate,
     priority,
     epicLink,
     sprint,
     assignee,
+    labels,
     dod,
     reporter = JIRA.Users.LoggedInUser.userName(),
     ...data
@@ -193,7 +205,7 @@ export default class JiraApiBrowser extends JiraApi {
         reporter: {
           name: reporter
         },
-        labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug'],
+        labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug'].concat(labels).filter(Boolean),
         priority: {
           // Low Medium High
           name: priority || 'Low'

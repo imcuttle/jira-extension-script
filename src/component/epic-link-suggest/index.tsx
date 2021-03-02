@@ -72,6 +72,9 @@ export const JiraSuggest = React.forwardRef<
     }
 
     return Object.keys(data).map((group) => {
+      if (!data[group] || !data[group].length) {
+        return null
+      }
       return (
         <Select.OptGroup label={group} key={group}>
           {renderOptions(data[group])}

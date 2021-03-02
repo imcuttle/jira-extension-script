@@ -34,8 +34,8 @@ import mdastStringify from '../../shared/mdast-stringify'
 import { JiraSuggest } from '../epic-link-suggest'
 import TreeNode from '../../shared/tree-node'
 import url from 'url'
-import treeNodesToConfluence from "../../shared/tree-node-to-confluence";
-import UserSuggest from "../user-suggest";
+import treeNodesToConfluence from '../../shared/tree-node-to-confluence'
+import UserSuggest from '../user-suggest'
 
 const JiraModalImport = React.forwardRef<
   {},
@@ -201,7 +201,7 @@ const JiraModalImport = React.forwardRef<
           </Row>
 
           <Row gutter={24}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item label="Epic Link" name="epicLink">
                 <JiraSuggest
                   group
@@ -227,9 +227,7 @@ const JiraModalImport = React.forwardRef<
                 />
               </Form.Item>
             </Col>
-          </Row>
 
-          <Row gutter={24}>
             <Col span={8}>
               <Form.Item label={'优先级'} name={'priority'}>
                 <Select>
@@ -265,7 +263,32 @@ const JiraModalImport = React.forwardRef<
                 <UserSuggest jiraApi={jiraApi} />
               </Form.Item>
             </Col>
+
+            <Col span={8}>
+              <Form.Item label="标签" name="labels">
+                <JiraSuggest
+                  group
+                  fetcher={async (input) => {
+                    if (!input) {
+                      return []
+                    }
+                    const res = await jiraApi.querySuggestLabels(input)
+                    if (res.data?.suggestions) {
+                      return {
+                        建议: res.data?.suggestions.map((x) => ({
+                          value: x.label,
+                          label: <span dangerouslySetInnerHTML={{ __html: x.html }} />
+                        }))
+                      }
+                    }
+                  }}
+                  mode={'tags'}
+                />
+              </Form.Item>
+            </Col>
           </Row>
+
+          <Row gutter={24}></Row>
         </Form>
 
         <div style={{ marginTop: 6, marginBottom: 10 }}>
