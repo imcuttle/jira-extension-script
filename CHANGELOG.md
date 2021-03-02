@@ -1,3 +1,12 @@
+## [1.0.8](https://github.com/余聪/jira-extension-script/compare/v1.0.7...v1.0.8) (2021-03-02)
+
+
+### Bug Fixes
+
+* issueType 英文字段 & feat: del 标签 filter ([c17509b](https://github.com/余聪/jira-extension-script/commit/c17509bb0707f2cf49d6c19768fd23ffbadb67ee))
+
+
+
 ## [1.0.7](https://github.com/余聪/jira-extension-script/compare/v1.0.2...v1.0.7) (2021-03-02)
 
 
