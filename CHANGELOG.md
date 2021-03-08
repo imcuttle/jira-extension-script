@@ -1,8 +1,17 @@
+## [1.0.10](https://github.com/余聪/jira-extension-script/compare/v1.0.9...v1.0.10) (2021-03-08)
+
+
+### Bug Fixes
+
+* 修复 及时上线 value ([05256b1](https://github.com/余聪/jira-extension-script/commit/05256b1fb47ae2e5ee4fc6b0641ffd62f94b0979))
+
+
+
 ## [1.0.9](https://github.com/余聪/jira-extension-script/compare/v1.0.8...v1.0.9) (2021-03-02)
 
 
 
-## [1.0.8](https://github.com/余聪/jira-extension-script/compare/v1.0.7...v1.0.8) (2021-03-02)
+## [1.0.8](https://github.com/余聪/jira-extension-script/compare/v1.0.6...v1.0.8) (2021-03-02)
 
 
 ### Bug Fixes
@@ -10,13 +19,25 @@
 * issueType 英文字段 & feat: del 标签 filter ([c17509b](https://github.com/余聪/jira-extension-script/commit/c17509bb0707f2cf49d6c19768fd23ffbadb67ee))
 
 
-
-## [1.0.7](https://github.com/余聪/jira-extension-script/compare/v1.0.2...v1.0.7) (2021-03-02)
-
-
 ### Features
 
 * 支持标签 ([4ff8c0e](https://github.com/余聪/jira-extension-script/commit/4ff8c0e6a5366c9c84651a42736eb1d922a6203a))
+
+
+
+## [1.0.6](https://github.com/余聪/jira-extension-script/compare/v1.0.5...v1.0.6) (2021-03-01)
+
+
+
+## [1.0.5](https://github.com/余聪/jira-extension-script/compare/v1.0.4...v1.0.5) (2021-03-01)
+
+
+
+## [1.0.4](https://github.com/余聪/jira-extension-script/compare/v1.0.3...v1.0.4) (2021-03-01)
+
+
+
+## [1.0.3](https://github.com/余聪/jira-extension-script/compare/v1.0.2...v1.0.3) (2021-03-01)
 
 
 
