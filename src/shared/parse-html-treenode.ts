@@ -1,9 +1,13 @@
 import TreeNode from './tree-node'
 
-const isBlockElem = elem => ['DIV', 'P', 'BR'].includes(elem?.tagName)
+const isBlockElem = (elem) => ['DIV', 'P', 'BR'].includes(elem?.tagName)
 
 function generateText(domElem: Element) {
   if (!domElem) {
+    return ''
+  }
+
+  if (domElem.tagName === 'S' || domElem.tagName === 'DEL') {
     return ''
   }
 

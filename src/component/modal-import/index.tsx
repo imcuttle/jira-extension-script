@@ -34,8 +34,15 @@ import mdastStringify from '../../shared/mdast-stringify'
 import { JiraSuggest } from '../epic-link-suggest'
 import TreeNode from '../../shared/tree-node'
 import url from 'url'
-import treeNodesToConfluence from "../../shared/tree-node-to-confluence";
-import UserSuggest from "../user-suggest";
+import treeNodesToConfluence from '../../shared/tree-node-to-confluence'
+import UserSuggest from '../user-suggest'
+
+const IssueLabel = (x) => (
+  <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+    <Avatar style={{ width: 16, height: 16, marginRight: 4 }} shape={'circle'} src={x.iconUrl} />
+    <span>{x.name}</span>
+  </span>
+)
 
 const JiraModalImport = React.forwardRef<
   {},
@@ -46,6 +53,8 @@ const JiraModalImport = React.forwardRef<
   React.useImperativeHandle(ref, () => ({}), [])
   const importPreviewRef = React.useRef(null)
   const [input, setInput] = React.useState('')
+  const [issueTypes, setIssueTypes] = React.useState([])
+
   const [loading, setLoading] = React.useState(false)
 
   const onImportInputKeydown = React.useCallback((evt) => {
@@ -88,20 +97,20 @@ const JiraModalImport = React.forwardRef<
       全部: allMatches.map(renderOption)
     }
   }, [])
+
   React.useEffect(() => {
-    // const fetchInitialData = async () => {
-    //   const data = await sprintFetcher('')
-    //   setSprintData(data)
-    //
-    //   if (data.建议[0]) {
-    //     form.setFieldsValue({
-    //       sprint: data.建议[0].value
-    //     })
-    //   }
-    // }
-    //
-    // fetchInitialData()
-  }, [form, sprintFetcher])
+    const fetch = async () => {
+      if (JIRA?.API?.Projects?.getCurrentProjectKey()) {
+        setLoading(true)
+        const res = await jiraApi.queryProject(JIRA?.API?.Projects?.getCurrentProjectKey())
+        if (res.data?.issueTypes) {
+          setIssueTypes(res.data?.issueTypes)
+        }
+        setLoading(false)
+      }
+    }
+    fetch()
+  }, [setLoading, JIRA?.API?.Projects?.getCurrentProjectKey()])
 
   return (
     <Modal
@@ -139,9 +148,7 @@ const JiraModalImport = React.forwardRef<
                   parent: {
                     key: issue.key
                   },
-                  issuetype: {
-                    name: '子任务'
-                  },
+                  issuetype: '5',
                   // 子任务不能存在以下属性
                   dod: undefined,
                   sprint: undefined,
@@ -186,13 +193,25 @@ const JiraModalImport = React.forwardRef<
         </div>
         <Form
           initialValues={{
-            dod: '10241'
+            dod: '10241',
+            issuetype: '10001'
           }}
           className={c('__common-form')}
           form={form}
           labelCol={{ style: { width: 100 } }}
         >
           <Row gutter={24}>
+            <Col span={8}>
+              <Form.Item label="父 Issue 类型" name="issuetype">
+                <Select>
+                  {issueTypes.map((x) => (
+                    <Select.Option key={x.id} value={x.id} title={x.description}>
+                      <IssueLabel {...x} />
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
             <Col span={12}>
               <Form.Item label="Sprint" name="sprint">
                 <JiraSuggest group data={sprintData} onDataChange={setSprintData} fetcher={sprintFetcher} />
@@ -201,7 +220,7 @@ const JiraModalImport = React.forwardRef<
           </Row>
 
           <Row gutter={24}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item label="Epic Link" name="epicLink">
                 <JiraSuggest
                   group
@@ -227,9 +246,7 @@ const JiraModalImport = React.forwardRef<
                 />
               </Form.Item>
             </Col>
-          </Row>
 
-          <Row gutter={24}>
             <Col span={8}>
               <Form.Item label={'优先级'} name={'priority'}>
                 <Select>
@@ -265,7 +282,32 @@ const JiraModalImport = React.forwardRef<
                 <UserSuggest jiraApi={jiraApi} />
               </Form.Item>
             </Col>
+
+            <Col span={8}>
+              <Form.Item label="标签" name="labels">
+                <JiraSuggest
+                  group
+                  fetcher={async (input) => {
+                    if (!input) {
+                      return []
+                    }
+                    const res = await jiraApi.querySuggestLabels(input)
+                    if (res.data?.suggestions) {
+                      return {
+                        建议: res.data?.suggestions.map((x) => ({
+                          value: x.label,
+                          label: <span dangerouslySetInnerHTML={{ __html: x.html }} />
+                        }))
+                      }
+                    }
+                  }}
+                  mode={'tags'}
+                />
+              </Form.Item>
+            </Col>
           </Row>
+
+          <Row gutter={24}></Row>
         </Form>
 
         <div style={{ marginTop: 6, marginBottom: 10 }}>
@@ -288,7 +330,7 @@ const JiraModalImport = React.forwardRef<
             className={c('__import-left')}
             onPaste={(evt) => {
               const html = evt.clipboardData.getData('text/html')
-              // console.log('html', html);
+              console.log('html', html);
               if (html) {
                 const treeNode = parseHtmlTreeNode(html)
                 // console.log('treeNode', treeNode);

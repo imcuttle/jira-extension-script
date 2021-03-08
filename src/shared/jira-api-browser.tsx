@@ -151,12 +151,25 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
+  async querySuggestLabels(query) {
+    return this.request({
+      method: 'get',
+      baseURL: url.format({ host: url.parse(this.axios.defaults.baseURL || '').host, pathname: '' }),
+      url: '/rest/api/1.0/labels/suggest',
+      params: {
+        query
+      }
+    })
+  }
+
   private _createIssueReqBody({
     estimate,
     priority,
     epicLink,
+    issuetype,
     sprint,
     assignee,
+    labels,
     dod,
     reporter = JIRA.Users.LoggedInUser.userName(),
     ...data
@@ -185,7 +198,7 @@ export default class JiraApiBrowser extends JiraApi {
         },
         // https://jira.zhenguanyu.com/rest/api/2/project/$PROJECT  可以获取 issuetype 列表
         issuetype: {
-          name: '故事'
+          id: issuetype
         },
         assignee: {
           name: assignee
@@ -193,7 +206,9 @@ export default class JiraApiBrowser extends JiraApi {
         reporter: {
           name: reporter
         },
-        labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug'],
+        labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug']
+          .concat(labels)
+          .filter(Boolean),
         priority: {
           // Low Medium High
           name: priority || 'Low'
@@ -287,12 +302,12 @@ export default class JiraApiBrowser extends JiraApi {
           </Typography.Link>
         )
       })
+      return
     }
 
-    if (!issues || !issues.length) {
-      notification.error({
-        message: '创建 Jira Issue 失败'
-      })
+    if (res.data.errors && res.data.errors[0] && res.data.errors[0].elementErrors) {
+      const elementErrors = res.data.errors[0].elementErrors
+      this._toastErrors(elementErrors?.errorMessages?.length ? elementErrors.errorMessages : elementErrors.errors)
     }
 
     return res
@@ -323,7 +338,7 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
-  queryProject(key) {
+  queryProject(key = JIRA.API.Projects.getCurrentProjectKey()) {
     return this.request({
       method: 'get',
       url: `/project/${key}`
