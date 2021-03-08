@@ -247,7 +247,7 @@ const JiraModalImport = React.forwardRef<
                   <Select.Option value={'10241'}>上线</Select.Option>
                   <Select.Option value={'10242'}>上线并隐藏入口</Select.Option>
                   <Select.Option value={'10243'}>上测试</Select.Option>
-                  <Select.Option value={'10243'}>及时上线</Select.Option>
+                  <Select.Option value={'10244'}>及时上线</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
