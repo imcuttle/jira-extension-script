@@ -132,7 +132,7 @@ const JiraModalImport = React.forwardRef<
           const rawBody = form.getFieldsValue()
           return {
             ...rawBody,
-            components: rawBody.components.map((id) => ({ id })),
+            components: rawBody.components?.map((id) => ({ id })) || [],
             tasksBody: nodes.map((node) => ({
               ...node.data.params,
               // estimate?: number
