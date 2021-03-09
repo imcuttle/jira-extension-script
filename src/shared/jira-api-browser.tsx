@@ -129,6 +129,13 @@ export default class JiraApiBrowser extends JiraApi {
     return res
   }
 
+  queryComponents() {
+    return this.axios.request({
+      method: 'GET',
+      url: `/project/${JIRA.API.Projects.getCurrentProjectKey()}/components`,
+    }).then(res => res.data)
+  }
+
   async querySuggestSprints({ query }: { query?: string }) {
     return this.request({
       method: 'get',
