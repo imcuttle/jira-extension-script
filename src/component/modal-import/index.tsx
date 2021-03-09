@@ -74,7 +74,6 @@ const JiraModalImport = React.forwardRef<
 
   const [form] = Form.useForm()
   const [sprintData, setSprintData] = React.useState({})
-  const [jiraComponentId, setJiraComponentId] = React.useState<number>()
   const [jiraComponents, setJiraComponents] = React.useState([])
 
   const sprintFetcher = React.useCallback(async (val) => {
@@ -129,16 +128,19 @@ const JiraModalImport = React.forwardRef<
         }
 
         const nodes = mdastToTreeNodes(mdast)
-        const getReqBody = (nodes: TreeNode[]) => ({
-          ...{ ...form.getFieldsValue(), component: undefined },
-          tasksBody: nodes.map((node) => ({
-            ...node.data.params,
-            // estimate?: number
-            summary: node.value,
-            components: jiraComponentId ? [{ id: jiraComponentId }] : [],
-            description: treeNodesToConfluence(node.children)
-          }))
-        })
+        const getReqBody = (nodes: TreeNode[]) => {
+          const rawBody = form.getFieldsValue()
+          return {
+            ...rawBody,
+            components: rawBody.components.map((id) => ({ id })),
+            tasksBody: nodes.map((node) => ({
+              ...node.data.params,
+              // estimate?: number
+              summary: node.value,
+              description: treeNodesToConfluence(node.children)
+            }))
+          }
+        }
 
         setLoading(true)
         const parentRes = await jiraApi.createIssues(getReqBody(nodes), { toastSuccess: false })
@@ -223,8 +225,13 @@ const JiraModalImport = React.forwardRef<
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item label="Component" name="component">
-                <Select showSearch value={jiraComponentId} onChange={v => setJiraComponentId(v)} optionFilterProp='children' filterOption={(input, option) => [console.log(option), option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0][1]}>
+              <Form.Item label="模块" name="components">
+                <Select
+                  showSearch
+                  mode={'multiple'}
+                  optionFilterProp="children"
+                  filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                >
                   {jiraComponents.map((comp) => (
                     <Select.Option key={comp.id} value={comp.id}>
                       {comp.name}
@@ -346,7 +353,7 @@ const JiraModalImport = React.forwardRef<
             className={c('__import-left')}
             onPaste={(evt) => {
               const html = evt.clipboardData.getData('text/html')
-              console.log('html', html);
+              console.log('html', html)
               if (html) {
                 const treeNode = parseHtmlTreeNode(html)
                 // console.log('treeNode', treeNode);
