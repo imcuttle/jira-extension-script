@@ -10,7 +10,7 @@
     "dev": "TSC_OPTIONS=\"--watch\" npm run build",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
-    "postpublish": "git push origin",
+    "postpublish": "git push origin $(git rev-parse --abbrev-ref HEAD)",
     "version": "npm run changelog",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
   },
