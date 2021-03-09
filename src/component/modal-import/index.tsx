@@ -74,6 +74,8 @@ const JiraModalImport = React.forwardRef<
 
   const [form] = Form.useForm()
   const [sprintData, setSprintData] = React.useState({})
+  const [jiraComponentId, setJiraComponentId] = React.useState<number>()
+  const [jiraComponents, setJiraComponents] = React.useState([])
 
   const sprintFetcher = React.useCallback(async (val) => {
     const renderOption = (d: any) => {
@@ -106,6 +108,8 @@ const JiraModalImport = React.forwardRef<
         if (res.data?.issueTypes) {
           setIssueTypes(res.data?.issueTypes)
         }
+        const components = await jiraApi.queryComponents().catch(() => [])
+        setJiraComponents(components)
         setLoading(false)
       }
     }
@@ -126,11 +130,12 @@ const JiraModalImport = React.forwardRef<
 
         const nodes = mdastToTreeNodes(mdast)
         const getReqBody = (nodes: TreeNode[]) => ({
-          ...form.getFieldsValue(),
+          ...{ ...form.getFieldsValue(), component: undefined },
           tasksBody: nodes.map((node) => ({
             ...node.data.params,
             // estimate?: number
             summary: node.value,
+            components: jiraComponentId ? [{ id: jiraComponentId }] : [],
             description: treeNodesToConfluence(node.children)
           }))
         })
@@ -212,9 +217,20 @@ const JiraModalImport = React.forwardRef<
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item label="Sprint" name="sprint">
                 <JiraSuggest group data={sprintData} onDataChange={setSprintData} fetcher={sprintFetcher} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="Component" name="component">
+                <Select showSearch value={jiraComponentId} onChange={v => setJiraComponentId(v)} optionFilterProp='children' filterOption={(input, option) => [console.log(option), option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0][1]}>
+                  {jiraComponents.map((comp) => (
+                    <Select.Option key={comp.id} value={comp.id}>
+                      {comp.name}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
