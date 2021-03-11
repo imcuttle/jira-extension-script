@@ -3,6 +3,7 @@ import React from 'react'
 import uniq from 'lodash.uniq'
 import { Form, InputNumber, notification, Popconfirm, Popover } from 'antd'
 import { css } from '@emotion/css'
+import setIntervalCheck from 'interval-check'
 import { isNotIssueReady, isNotReady, useToken } from '../shared/utils'
 import JiraApiBrowser from '../shared/jira-api-browser'
 import { UserAddOutlined, LoadingOutlined } from '@ant-design/icons'
@@ -75,7 +76,6 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       }
       okButtonProps={{ loading }}
       onConfirm={async () => {
-
         const subKeys = getSubKeys()
         if (subKeys.length) {
           setLoading(true)
@@ -100,39 +100,48 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
 }
 
 const handleClick = () => {
-  setTimeout(() => {
-    subtasksAssigneeRender()
-  }, 3500)
+  subtasksAssigneeRender()
 }
 
+let globalDispose = null
+
 export default function subtasksAssigneeRender() {
-  const backlogContainer = document.querySelector('#ghx-backlog')
+  const backlogContainer = document.querySelector('#ghx-rabid')
   if (backlogContainer) {
     backlogContainer.removeEventListener('click', handleClick)
     backlogContainer.addEventListener('click', handleClick)
   }
 
-  const alreadyHad = document.querySelector('.jira-extension-subtasks-assignee')
-  if (alreadyHad) {
-    return
+  if (globalDispose) {
+    globalDispose()
   }
 
-  const container =
-    document.querySelector(`#view-subtasks_heading .ops`) || document.querySelector(`#subtasks_heading .ops`)
-  if (!container) {
-    setTimeout(() => {
-      subtasksAssigneeRender()
-    }, 1000)
-    return
-  }
+  const dispose = setIntervalCheck(
+    null,
+    () => {
+      const container =
+        document.querySelector(`#view-subtasks_heading .ops`) || document.querySelector(`#subtasks_heading .ops`)
+      if (container) {
+        if (container.querySelector('.jira-extension-subtasks-assignee')) {
+          return false
+        }
 
-  if (!getSubKeys().length) {
-    return
-  }
+        if (!getSubKeys().length) {
+          dispose()
+          return false
+        }
 
-  const elem = document.createElement('li')
-  elem.classList.add('jira-extension-subtasks-assignee')
-  container.prepend(elem)
+        const elem = document.createElement('li')
+        elem.classList.add('jira-extension-subtasks-assignee')
+        container.prepend(elem)
 
-  return pizza(SubtasksAssigneeComponent)(elem, {})
+        pizza(SubtasksAssigneeComponent)(elem, {})
+      }
+
+      return false
+    },
+    500
+  )
+
+  globalDispose = dispose
 }

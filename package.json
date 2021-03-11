@@ -75,6 +75,7 @@
     "antd": "^4.12.2",
     "axios": "^0.21.1",
     "github-markdown-css": "^4.0.0",
+    "interval-check": "^1.0.2",
     "is-hotkey": "^0.2.0",
     "js-cookie": "^2.2.1",
     "lodash.get": "^4.4.2",
