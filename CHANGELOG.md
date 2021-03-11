@@ -1,3 +1,12 @@
+## [1.0.12](https://github.com/余聪/jira-extension-script/compare/v1.0.11...v1.0.12) (2021-03-11)
+
+
+### Bug Fixes
+
+* subtask assgin 有时候不渲染问题修复 ([9dd523d](https://github.com/余聪/jira-extension-script/commit/9dd523dab6469ed381142e3ea342e438f6754ce7))
+
+
+
 ## [1.0.11](https://github.com/余聪/jira-extension-script/compare/v1.0.10...v1.0.11) (2021-03-09)
 
 
