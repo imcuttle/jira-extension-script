@@ -23,6 +23,8 @@ import 'github-markdown-css/github-markdown.css'
 const cn = p()
 const c = p('jira_modal-import')
 
+const labelCol = { style: { width: 100 } }
+
 import './style.sass'
 import JiraApiBrowser from '../../shared/jira-api-browser'
 import parseHtmlTreeNode from '../../shared/parse-html-treenode'
@@ -120,6 +122,7 @@ const JiraModalImport = React.forwardRef<
       maskClosable={false}
       className={c()}
       title={'导入jira'}
+      wrapClassName={c('__wrapper')}
       {...props}
       confirmLoading={loading}
       onOk={async (e) => {
@@ -205,7 +208,7 @@ const JiraModalImport = React.forwardRef<
           }}
           className={c('__common-form')}
           form={form}
-          labelCol={{ style: { width: 100 } }}
+          labelCol={labelCol}
         >
           <Row gutter={24}>
             <Col span={8}>
@@ -281,14 +284,22 @@ const JiraModalImport = React.forwardRef<
             </Col>
 
             <Col span={8}>
-              <Form.Item label={'DoD'} name={'dod'}>
-                <Select allowClear>
-                  <Select.Option value={'-1'}>无</Select.Option>
-                  <Select.Option value={'10241'}>上线</Select.Option>
-                  <Select.Option value={'10242'}>上线并隐藏入口</Select.Option>
-                  <Select.Option value={'10243'}>上测试</Select.Option>
-                  <Select.Option value={'10244'}>及时上线</Select.Option>
-                </Select>
+              <Form.Item shouldUpdate={(prevValues, nextValues) => prevValues.issuetype !== nextValues.issuetype}>
+                {(instance) => {
+                  return (
+                    (!instance.getFieldsValue().issuetype || instance.getFieldsValue().issuetype === '10001') && (
+                      <Form.Item label={'DoD'} name={'dod'} labelCol={labelCol} style={{ marginBottom: 0 }}>
+                        <Select allowClear>
+                          <Select.Option value={'-1'}>无</Select.Option>
+                          <Select.Option value={'10241'}>上线</Select.Option>
+                          <Select.Option value={'10242'}>上线并隐藏入口</Select.Option>
+                          <Select.Option value={'10243'}>上测试</Select.Option>
+                          <Select.Option value={'10244'}>及时上线</Select.Option>
+                        </Select>
+                      </Form.Item>
+                    )
+                  )
+                }}
               </Form.Item>
             </Col>
           </Row>
