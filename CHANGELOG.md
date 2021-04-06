@@ -1,3 +1,12 @@
+## [1.0.14](https://github.com/余聪/jira-extension-script/compare/v1.0.13...v1.0.14) (2021-04-06)
+
+
+### Features
+
+* default assignee ([ddd4014](https://github.com/余聪/jira-extension-script/commit/ddd4014a4ceb54b6108f75c1fbb2f52428152a67))
+
+
+
 ## [1.0.13](https://github.com/余聪/jira-extension-script/compare/v1.0.12...v1.0.13) (2021-03-19)
 
 
