@@ -32,6 +32,11 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       }),
     [token]
   )
+  const update = () => {
+    jiraApi.updateIssue(JIRA.Issue.getIssueId(), form.getFieldsValue())
+  }
+  const [loading, setLoading] = React.useState(false)
+  const [user, setUser] = React.useState(undefined)
   React.useEffect(() => {
     jiraApi.queryIssue(JIRA.Issue.getIssueKey()).then((res: any) => {
       let user = null
@@ -43,17 +48,12 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
           user = res.data.fields.assignee.key
         }
       }
-      setDefaultValue(user)
+      setUser(user)
     })
   }, [JIRA.Issue.getIssueKey()])
 
-  const update = () => {
-    jiraApi.updateIssue(JIRA.Issue.getIssueId(), form.getFieldsValue())
-  }
-  const [loading, setLoading] = React.useState(false)
-  const [user, setUser] = React.useState(undefined)
 
-  if (defaultValue === undefined || !token || isNotReady() || isNotIssueReady()) {
+  if (user === undefined || !token || isNotReady() || isNotIssueReady()) {
     return null
   }
 
