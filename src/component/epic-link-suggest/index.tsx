@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useReducer } from 'react'
+import React, { ReactNode, useReducer } from 'react'
 import { Button, Dropdown, Menu, Input, Modal, Drawer, Typography, Select, SelectProps, Spin } from 'antd'
 import p from 'prefix-classname'
 import useUncontrolled from '@rcp/use.uncontrolled'
@@ -27,12 +27,6 @@ export const JiraSuggest = React.forwardRef<
     defaultValue,
     onChange
   })
-  useEffect(() => {
-    // 仅当有初始默认值时自动触发一次
-    if (valueState) {
-      handleSearch(valueState)
-    }
-  }, [])
   const [data, setData] = useUncontrolled({
     value: _data,
     defaultValue: defaultData || group ? {} : [],
