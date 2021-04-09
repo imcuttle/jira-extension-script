@@ -24,6 +24,7 @@ const getSubKeys = () => {
 const SubtasksAssigneeComponent: React.FC<{}> = function () {
   const [form] = Form.useForm()
   const [token] = useToken()
+  const [defaultValue, setDefaultValue] = React.useState()
   const jiraApi = React.useMemo(
     () =>
       new JiraApiBrowser({
@@ -31,25 +32,30 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       }),
     [token]
   )
-  React.useEffect(() => {
-    jiraApi.queryIssue(JIRA.Issue.getIssueKey()).then((res: any) => {
-      if (res.data.fields) {
-        form.setFieldsValue({
-          estimate: res.data.fields.customfield_10002
-        })
-      }
-    })
-  }, [JIRA.Issue.getIssueKey()])
-
-  if (!token || isNotReady() || isNotIssueReady()) {
-    return null
-  }
-
   const update = () => {
     jiraApi.updateIssue(JIRA.Issue.getIssueId(), form.getFieldsValue())
   }
   const [loading, setLoading] = React.useState(false)
-  const [user, setUser] = React.useState(null)
+  const [user, setUser] = React.useState(undefined)
+  React.useEffect(() => {
+    jiraApi.queryIssue(JIRA.Issue.getIssueKey()).then((res: any) => {
+      let user = null
+      if (res.data.fields) {
+        form.setFieldsValue({
+          estimate: res.data.fields.customfield_10002
+        })
+        if (res.data.fields.assignee) {
+          user = res.data.fields.assignee.key
+        }
+      }
+      setUser(user)
+    })
+  }, [JIRA.Issue.getIssueKey()])
+
+
+  if (user === undefined || !token || isNotReady() || isNotIssueReady()) {
+    return null
+  }
 
   return (
     <Popconfirm
@@ -72,6 +78,7 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
           style={{ width: 160 }}
           size={'small'}
           placeholder={'设置经办人'}
+          defaultValue={defaultValue}
         />
       }
       okButtonProps={{ loading }}

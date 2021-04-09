@@ -1,3 +1,17 @@
+## [1.0.16-beta.0](https://github.com/余聪/jira-extension-script/compare/v1.0.15...v1.0.16-beta.0) (2021-04-09)
+
+
+### Bug Fixes
+
+* 用户默认值没生效 ([06ccc02](https://github.com/余聪/jira-extension-script/commit/06ccc0271aceefdc962381b81bf83f55be9c7bc3))
+
+
+### Reverts
+
+* Revert "Revert "Merge pull request #2 from lsdsjy/master"" ([180a80f](https://github.com/余聪/jira-extension-script/commit/180a80faecf89f1a5ed4d8280e32cd5977bdb0c6)), closes [#2](https://github.com/余聪/jira-extension-script/issues/2)
+
+
+
 ## [1.0.15](https://github.com/余聪/jira-extension-script/compare/v1.0.14...v1.0.15) (2021-04-09)
 
 
