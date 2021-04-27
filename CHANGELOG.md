@@ -1,8 +1,4 @@
-## [1.0.16](https://github.com/余聪/jira-extension-script/compare/v1.0.16-beta.0...v1.0.16) (2021-04-09)
-
-
-
-## [1.0.16-beta.0](https://github.com/余聪/jira-extension-script/compare/v1.0.15...v1.0.16-beta.0) (2021-04-09)
+## [1.0.17](https://github.com/余聪/jira-extension-script/compare/v1.0.15...v1.0.17) (2021-04-27)
 
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 {
   "name": "jira-extension-script",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "jira browser script",
   "author": "余聪 <yucong@fenbi.com>",
   "scripts": {
