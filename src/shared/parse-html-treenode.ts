@@ -48,11 +48,18 @@ function generateTreeNode(domElem, parentTreeNode?: TreeNode) {
 
 export default function parseHtmlTreeNode(html: string): false | TreeNode {
   const docElement = new DOMParser().parseFromString(html, 'text/html')
-  const ulElement = docElement.querySelector('[data-shimo-docs] > ul')
-  if (!ulElement) {
+  const ulElements = docElement.querySelectorAll('[data-shimo-docs] > ul')
+  if (!ulElements.length) {
     // 不匹配石墨
     return false
   }
 
-  return generateTreeNode(ulElement)
+  const treeNode = new TreeNode()
+  ulElements.forEach(node => {
+    generateTreeNode(node).children.forEach(childNode => {
+      treeNode.addNode(childNode)
+    })
+  })
+
+  return treeNode
 }
