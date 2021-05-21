@@ -11,6 +11,7 @@ module.exports = {
   output: {
     library: isDev ? '_JiraExtensionScript' : 'JiraExtensionScript',
     libraryTarget: 'umd',
+    publicPath: isDev ? 'http://localhost:8080' : 'auto'
   },
   devServer: {
   },
