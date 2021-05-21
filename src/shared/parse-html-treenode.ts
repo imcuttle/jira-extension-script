@@ -24,10 +24,18 @@ function generateText(domElem: Element) {
   return text + suffix
 }
 
-function generateTreeNode(domElem, parentTreeNode?: TreeNode) {
+function generateTreeNode(domElem, parentTreeNode?: TreeNode, { estimateRegExp }?: ParseHtmlTreeOptions) {
   if (domElem.tagName === 'LI') {
     const text = generateText(domElem).trim()
-    return text ? new TreeNode(text) : null
+    if (text) {
+      const textTreeNode = new TreeNode(text)
+      let matched
+      if (estimateRegExp && (matched = text.match(estimateRegExp))) {
+        textTreeNode.data.estimate = matched[1]
+      }
+      return textTreeNode
+    }
+    return null
   }
 
   const prevTreeNode = parentTreeNode?.children[parentTreeNode.children.length - 1]
@@ -46,7 +54,14 @@ function generateTreeNode(domElem, parentTreeNode?: TreeNode) {
   return null
 }
 
-export default function parseHtmlTreeNode(html: string): false | TreeNode {
+export interface ParseHtmlTreeOptions {
+  estimateRegExp?: RegExp
+}
+
+export default function parseHtmlTreeNode(
+  html: string,
+  { estimateRegExp }: ParseHtmlTreeOptions = {}
+): false | TreeNode {
   const docElement = new DOMParser().parseFromString(html, 'text/html')
   const ulElements = docElement.querySelectorAll('[data-shimo-docs] > ul')
   if (!ulElements.length) {
@@ -55,8 +70,8 @@ export default function parseHtmlTreeNode(html: string): false | TreeNode {
   }
 
   const treeNode = new TreeNode()
-  ulElements.forEach(node => {
-    generateTreeNode(node).children.forEach(childNode => {
+  ulElements.forEach((node) => {
+    generateTreeNode(node, undefined, { estimateRegExp }).children.forEach((childNode) => {
       treeNode.addNode(childNode)
     })
   })
