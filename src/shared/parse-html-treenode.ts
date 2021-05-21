@@ -24,7 +24,7 @@ function generateText(domElem: Element) {
   return text + suffix
 }
 
-function generateTreeNode(domElem, parentTreeNode?: TreeNode, { estimateRegExp }?: ParseHtmlTreeOptions) {
+function generateTreeNode(domElem, parentTreeNode?: TreeNode, { estimateRegExp }: ParseHtmlTreeOptions = {}) {
   if (domElem.tagName === 'LI') {
     const text = generateText(domElem).trim()
     if (text) {
@@ -43,7 +43,7 @@ function generateTreeNode(domElem, parentTreeNode?: TreeNode, { estimateRegExp }
   if (domElem.tagName === 'UL' || domElem.tagName === 'OL') {
     const treeNode = prevTreeNode || new TreeNode()
     for (const childElem of domElem.children) {
-      treeNode.addNode(generateTreeNode(childElem, treeNode))
+      treeNode.addNode(generateTreeNode(childElem, treeNode, { estimateRegExp }))
     }
     // 取消传入
     if (prevTreeNode) {
