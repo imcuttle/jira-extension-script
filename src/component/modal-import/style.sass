@@ -2,12 +2,16 @@ $prefix: jira_modal-import
 
 .#{$prefix}
   &
+    .ant-modal-body
+      max-height: calc(100vh - 30px - 130px)
+      overflow: auto
     input
       &:focus
         box-shadow: none
   &__import-wrapper
     display: flex
-    height: 260px
+    textarea
+      min-height: 260px
 
   &__import-left,
   &__import-right
@@ -28,6 +32,9 @@ $prefix: jira_modal-import
         &:before
           color: #1890ff
           content: "[ISSUE] "
+        &[data-estimate]:before
+          color: #1890ff
+          content: "[ISSUE] (" attr(data-estimate) "' "
         > ul > li
           &:before
             color: #1890ff

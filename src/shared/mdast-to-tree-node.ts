@@ -14,7 +14,11 @@ export default function mdastToTreeNodes(mdast: any[]): TreeNode[] {
   const list = []
   listNodes.map((listNode) => {
     listNode.children.forEach((listItem) => {
-      list.push(listItemNodeToTreeNode(listItem))
+      const node = listItemNodeToTreeNode(listItem)
+      if (listItem?.data?.estimate && listItem.data.estimate > 0) {
+        node.data.estimate = listItem.data.estimate
+      }
+      list.push(node)
     })
   })
   return list
