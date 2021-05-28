@@ -8,9 +8,15 @@ const c = p('jira_import-preview')
 
 import './style.sass'
 import remark from 'remark'
-import stripMdast from '../../shared/strip-mdast'
+import transformMdast from '../../shared/transform-mdast'
 import html from 'remark-html'
-import {processor} from "../../shared/mdast-stringify";
+import { processor } from '../../shared/mdast-stringify'
+
+const x = (opts: any) => {
+  return (node) => {
+    console.log('node', node, opts)
+  }
+}
 
 const JiraImportPreview = React.forwardRef<
   {
@@ -18,18 +24,23 @@ const JiraImportPreview = React.forwardRef<
   },
   {
     markdown: string
+    parseOpts?: any
   }
->(({ markdown }, ref) => {
+>(({ parseOpts, markdown }, ref) => {
   const mdast = React.useMemo(() => {
     const node = processor().data('settings', { position: false }).parse(markdown)
-    stripMdast(node)
+    transformMdast(node, parseOpts)
     return node
-  }, [markdown])
+  }, [markdown, parseOpts])
   const htmlText = React.useMemo(() => processor().use(html).stringify(mdast), [mdast])
 
-  React.useImperativeHandle(ref, () => ({
-    mdast: mdast?.children
-  }), [mdast])
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      mdast: mdast?.children
+    }),
+    [mdast]
+  )
 
   return (
     <div className={c()}>

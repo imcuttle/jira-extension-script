@@ -19,14 +19,16 @@ const EstimateComponent: React.FC<{}> = function () {
   }
 
   React.useEffect(() => {
-    jiraApi.queryIssue(JIRA.Issue.getIssueKey())
-      .then((res: any) => {
-        if (res.data.fields) {
-          form.setFieldsValue({
-            estimate: res.data.fields.customfield_10002
-          })
-        }
-      })
+    if (JIRA.Issue.getIssueKey()) {
+      jiraApi.queryIssue(JIRA.Issue.getIssueKey())
+        .then((res: any) => {
+          if (res.data.fields) {
+            form.setFieldsValue({
+              estimate: res.data.fields.customfield_10002
+            })
+          }
+        })
+    }
   }, [JIRA.Issue.getIssueKey()])
 
   if (!token || isNotReady() || isNotIssueReady()) {

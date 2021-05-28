@@ -75,6 +75,9 @@ const JiraModalImport = React.forwardRef<
   )
 
   const [form] = Form.useForm()
+  const [parseOptions, setParseOptions] = React.useState({
+    estimateRegExp: `\\s+\\(?(\\d+)'?\\s*$` // `(?(\\d+)'?\\s*$`
+  })
   const [sprintData, setSprintData] = React.useState({})
   const [jiraComponents, setJiraComponents] = React.useState([])
 
@@ -117,6 +120,20 @@ const JiraModalImport = React.forwardRef<
     fetch()
   }, [setLoading, JIRA?.API?.Projects?.getCurrentProjectKey()])
 
+  const parseOpts = React.useMemo(() => {
+    let estimateRegExp
+    try {
+      estimateRegExp = new RegExp(parseOptions.estimateRegExp)
+    } catch (e) {
+      console.error(e)
+    }
+
+    return {
+      ...parseOptions,
+      estimateRegExp
+    }
+  }, [parseOptions])
+
   return (
     <Modal
       maskClosable={false}
@@ -138,7 +155,6 @@ const JiraModalImport = React.forwardRef<
             components: rawBody.components?.map((id) => ({ id })) || [],
             tasksBody: nodes.map((node) => ({
               ...node.data.params,
-              // estimate?: number
               summary: node.value,
               description: treeNodesToConfluence(node.children)
             }))
@@ -170,6 +186,20 @@ const JiraModalImport = React.forwardRef<
           })
 
           let issues = parentRes.data.issues
+
+          if (issues.length === nodes.length) {
+            const updateIssuesPromiseList = issues
+              .map((issue) => issue.id)
+              .map(async (id, i) => {
+                if (nodes[i]?.data?.estimate) {
+                  return jiraApi.updateIssue(id, {estimate: nodes[i]?.data?.estimate}, {toast: false})
+                }
+                return
+              })
+
+            Promise.all(updateIssuesPromiseList).catch(console.error)
+          }
+
           if (subTasks.length) {
             const subTasksRes = await jiraApi.createIssues(getReqBody(subTasks), { toastSuccess: false })
             issues = parentRes.data.issues.concat(subTasksRes.data.issues || [])
@@ -346,6 +376,26 @@ const JiraModalImport = React.forwardRef<
         </Form>
 
         <div style={{ marginTop: 6, marginBottom: 10 }}>
+          <div style={{ marginBottom: 10 }}>
+            <span style={{ fontSize: 17, fontWeight: 'bold', marginRight: 6 }}>解析配置</span>
+          </div>
+          <Form
+            initialValues={parseOptions}
+            className={c('__common-form')}
+            onValuesChange={(v) => setParseOptions(v)}
+            labelCol={labelCol}
+          >
+            <Row gutter={24}>
+              <Col span={8}>
+                <Form.Item label="估分正则" name="estimateRegExp">
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </div>
+
+        <div style={{ marginTop: 6, marginBottom: 10 }}>
           <span style={{ fontSize: 17, fontWeight: 'bold', marginRight: 6 }}>Issue 录入</span>
           <Typography.Link
             href={'https://confluence.zhenguanyu.com/pages/viewpage.action?pageId=127662878'}
@@ -356,6 +406,7 @@ const JiraModalImport = React.forwardRef<
         </div>
         <div className={c('__import-wrapper')}>
           <Input.TextArea
+            autoSize
             onKeyDown={onImportInputKeydown}
             value={input}
             onChange={(event) => {
@@ -381,7 +432,7 @@ const JiraModalImport = React.forwardRef<
             cols={12}
           />
           <div className={c('__import-right')}>
-            <JiraImportPreview ref={importPreviewRef} markdown={input || ''} />
+            <JiraImportPreview ref={importPreviewRef} markdown={input || ''} parseOpts={parseOpts} />
           </div>
         </div>
       </Spin>

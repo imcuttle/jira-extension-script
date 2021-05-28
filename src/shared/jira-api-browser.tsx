@@ -79,7 +79,12 @@ export default class JiraApiBrowser extends JiraApi {
       estimate
     }: {
       estimate?: number
-    }
+    },
+    {
+      toast = true
+    }: {
+      toast?: boolean
+    } = {}
   ) {
     const token = cookie.get('atlassian.xsrf.token')
 
@@ -107,11 +112,11 @@ export default class JiraApiBrowser extends JiraApi {
 
     // this._toastErrors(res.data.errors, { message: 'Failed' }) || this._toastErrors(res.data.errorMessages, { message: 'Failed' })
 
-    if (res.data.issue) {
+    if (toast && res.data.issue) {
       notification.success({
         message: '更新成功'
       })
-    } else {
+    } else if (toast) {
       notification.error({
         message: '更新失败'
       })
@@ -130,10 +135,12 @@ export default class JiraApiBrowser extends JiraApi {
   }
 
   queryComponents() {
-    return this.axios.request({
-      method: 'GET',
-      url: `/project/${JIRA.API.Projects.getCurrentProjectKey()}/components`,
-    }).then(res => res.data)
+    return this.axios
+      .request({
+        method: 'GET',
+        url: `/project/${JIRA.API.Projects.getCurrentProjectKey()}/components`
+      })
+      .then((res) => res.data)
   }
 
   async querySuggestSprints({ query }: { query?: string }) {
