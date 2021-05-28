@@ -276,6 +276,7 @@ const JiraModalImport = React.forwardRef<
             <Col span={8}>
               <Form.Item label={'优先级'} name={'priority'}>
                 <Select>
+                  <Select.Option value={'Highest'}>Highest</Select.Option>
                   <Select.Option value={'High'}>High</Select.Option>
                   <Select.Option value={'Medium'}>Medium</Select.Option>
                   <Select.Option value={'Low'}>Low</Select.Option>
