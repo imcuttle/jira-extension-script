@@ -78,9 +78,17 @@ const JiraModalImport = React.forwardRef<
 
   React.useEffect(() => {
     if (props.visible) {
-      jiraApi.queryFields().then((fields) => {
-        setFields(fields)
-      })
+      setLoading(true)
+      jiraApi
+        .queryFields()
+        .then((fields) => {
+          setFields(fields)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    } else {
+      setFields([])
     }
   }, [props.visible, jiraApi, setFields])
 
@@ -282,8 +290,9 @@ const JiraModalImport = React.forwardRef<
                   </Form.Item>
                 </Col>
               )}
-              <Col span={8}>
-                {hasKey('components') && (
+
+              {hasKey('components') && (
+                <Col span={8}>
                   <Form.Item label="模块" name="components">
                     <Select
                       showSearch
@@ -298,13 +307,10 @@ const JiraModalImport = React.forwardRef<
                       ))}
                     </Select>
                   </Form.Item>
-                )}
-              </Col>
-            </Row>
-
-            <Row gutter={24}>
-              <Col span={8}>
-                {hasKey('components') && (
+                </Col>
+              )}
+              {hasKey('components') && (
+                <Col span={8}>
                   <Form.Item label="Epic Link" name="epicLink">
                     <JiraSuggest
                       group
@@ -329,11 +335,10 @@ const JiraModalImport = React.forwardRef<
                       }}
                     />
                   </Form.Item>
-                )}
-              </Col>
-
-              <Col span={8}>
-                {hasKey('priority') && (
+                </Col>
+              )}
+              {hasKey('priority') && (
+                <Col span={8}>
                   <Form.Item label={'优先级'} name={'priority'}>
                     <Select>
                       <Select.Option value={'Highest'}>Highest</Select.Option>
@@ -342,11 +347,10 @@ const JiraModalImport = React.forwardRef<
                       <Select.Option value={'Low'}>Low</Select.Option>
                     </Select>
                   </Form.Item>
-                )}
-              </Col>
-
-              <Col span={8}>
-                {hasKey('labels') && (
+                </Col>
+              )}
+              {hasKey('labels') && (
+                <Col span={8}>
                   <Form.Item label="标签" name="labels">
                     <JiraSuggest
                       group
@@ -367,29 +371,24 @@ const JiraModalImport = React.forwardRef<
                       mode={'tags'}
                     />
                   </Form.Item>
-                )}
-              </Col>
-            </Row>
-
-            <Row gutter={24}>
-              <Col span={8}>
-                {hasKey('assignee') && (
+                </Col>
+              )}
+              {hasKey('assignee') && (
+                <Col span={8}>
                   <Form.Item label="经办人" name="assignee">
                     <UserSuggest jiraApi={jiraApi} />
                   </Form.Item>
-                )}
-              </Col>
-
-              <Col span={8}>
-                {hasKey('reporter') && (
+                </Col>
+              )}
+              {hasKey('reporter') && (
+                <Col span={8}>
                   <Form.Item label="报告人" name="reporter" initialValue={JIRA.Users.LoggedInUser.userName()}>
                     <UserSuggest jiraApi={jiraApi} />
                   </Form.Item>
-                )}
-              </Col>
-
-              <Col span={8}>
-                {hasKey('customfield_10506') && (
+                </Col>
+              )}
+              {hasKey('customfield_10506') && (
+                <Col span={8}>
                   <Form.Item shouldUpdate={(prevValues, nextValues) => prevValues.issuetype !== nextValues.issuetype}>
                     {(instance) => {
                       return (
@@ -407,11 +406,9 @@ const JiraModalImport = React.forwardRef<
                       )
                     }}
                   </Form.Item>
-                )}
-              </Col>
+                </Col>
+              )}
             </Row>
-
-            <Row gutter={24} />
           </Form>
         )}
 
