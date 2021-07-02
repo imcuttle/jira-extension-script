@@ -4,7 +4,7 @@ import { notification, Typography } from 'antd'
 import React from 'react'
 import cookie from 'js-cookie'
 import url from 'url'
-import { omitBy, isNil } from 'lodash'
+import omitNil from 'omit-nil'
 
 /**
  * /rest/greenhopper/1.0/sprint/picker?query=
@@ -210,40 +210,51 @@ export default class JiraApiBrowser extends JiraApi {
     priority?: string
     [prop: string]: any
   } = {}) {
-    const config = omitBy(
+    const config = omitNil(
       merge(
         {
           customfield_10002: estimate,
           customfield_10004: sprint,
-          customfield_10506: dod != null && {
-            id: dod
-          },
+          customfield_10506:
+            dod != null
+              ? {
+                  id: dod
+                }
+              : null,
           customfield_10005: epicLink,
           project: {
             key: JIRA.API.Projects.getCurrentProjectKey()
           },
           // https://jira.zhenguanyu.com/rest/api/2/project/$PROJECT  可以获取 issuetype 列表
-          issuetype: issuetype != null && {
-            id: issuetype
-          },
+          issuetype:
+            issuetype != null
+              ? {
+                  id: issuetype
+                }
+              : null,
           assignee: {
             name: assignee
           },
-          reporter: reporter != null && {
-            name: reporter
-          },
+          reporter:
+            reporter != null
+              ? {
+                  name: reporter
+                }
+              : null,
           labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug']
             .concat(labels)
             .filter(Boolean),
-          priority: priority != null && {
-            // Low Medium High
-            name: priority || 'Low'
-            // id: '20000'
-          }
+          priority:
+            priority != null
+              ? {
+                  // Low Medium High
+                  name: priority || 'Low'
+                  // id: '20000'
+                }
+              : null
         },
         data
-      ),
-      (x) => isNil(x) || x === false
+      )
     )
 
     if (!assignee) {

@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react'
-import { omitBy, isNil } from 'lodash'
+import omitNil from 'omit-nil'
 import {
   Button,
   Dropdown,
@@ -177,7 +177,7 @@ const JiraModalImport = React.forwardRef<
           const rawBody = form.getFieldsValue()
           return {
             ...rawBody,
-            components: rawBody.components?.map((id) => ({ id })) || [],
+            components: rawBody.components?.map((id) => ({ id })),
             tasksBody: nodes.map((node) => ({
               ...node.data.params,
               summary: node.value,
@@ -258,13 +258,10 @@ const JiraModalImport = React.forwardRef<
         </div>
         {!!fields.length && (
           <Form
-            initialValues={omitBy(
-              {
-                dod: hasKey('customfield_10506') ? '10241' : null,
-                issuetype: hasKey('issuetype') ? '10001' : null
-              },
-              isNil
-            )}
+            initialValues={omitNil({
+              dod: hasKey('customfield_10506') ? '10241' : null,
+              issuetype: hasKey('issuetype') ? '10001' : null
+            })}
             className={c('__common-form')}
             form={form}
             labelCol={labelCol}
