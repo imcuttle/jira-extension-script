@@ -306,7 +306,7 @@ const JiraModalImport = React.forwardRef<
                   </Form.Item>
                 </Col>
               )}
-              {hasKey('components') && (
+              {hasKey('customfield_10005') && (
                 <Col span={8}>
                   <Form.Item label="Epic Link" name="epicLink">
                     <JiraSuggest

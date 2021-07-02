@@ -184,7 +184,17 @@ export default class JiraApiBrowser extends JiraApi {
       url: '/secure/QuickCreateIssue!default.jspa?decorator=none',
       params: {}
     })
-    return response.data?.fields || []
+    if (response.data) {
+      let list = (response.data.fields || []).slice()
+      if (response.data.sortedTabs?.length) {
+        response.data.sortedTabs.forEach(tabs => {
+          list = list.concat(tabs.fields)
+        })
+      }
+      console.log('list', list);
+      return list
+    }
+    return []
   }
 
   private _createIssueReqBody({
