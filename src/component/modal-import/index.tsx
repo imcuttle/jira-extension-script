@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react'
+import { omitBy, isNil } from 'lodash'
 import {
   Button,
   Dropdown,
@@ -73,6 +74,15 @@ const JiraModalImport = React.forwardRef<
       }),
     [token]
   )
+  const [fields, setFields] = React.useState<Array<{ id: string }>>([])
+
+  React.useEffect(() => {
+    if (props.visible) {
+      jiraApi.queryFields().then((fields) => {
+        setFields(fields)
+      })
+    }
+  }, [props.visible, jiraApi, setFields])
 
   const [form] = Form.useForm()
   const [parseOptions, setParseOptions] = React.useState({
@@ -134,6 +144,13 @@ const JiraModalImport = React.forwardRef<
     }
   }, [parseOptions])
 
+  const hasKey = React.useCallback(
+    (key) => {
+      return fields.find((f) => f.id === key)
+    },
+    [fields]
+  )
+
   return (
     <Modal
       maskClosable={false}
@@ -192,7 +209,7 @@ const JiraModalImport = React.forwardRef<
               .map((issue) => issue.id)
               .map(async (id, i) => {
                 if (nodes[i]?.data?.estimate) {
-                  return jiraApi.updateIssue(id, {estimate: nodes[i]?.data?.estimate}, {toast: false})
+                  return jiraApi.updateIssue(id, { estimate: nodes[i]?.data?.estimate }, { toast: false })
                 }
                 return
               })
@@ -231,149 +248,172 @@ const JiraModalImport = React.forwardRef<
         <div style={{ marginBottom: 10 }}>
           <span style={{ fontSize: 17, fontWeight: 'bold', marginRight: 6 }}>公共配置</span>
         </div>
-        <Form
-          initialValues={{
-            dod: '10241',
-            issuetype: '10001'
-          }}
-          className={c('__common-form')}
-          form={form}
-          labelCol={labelCol}
-        >
-          <Row gutter={24}>
-            <Col span={8}>
-              <Form.Item label="父 Issue 类型" name="issuetype">
-                <Select>
-                  {issueTypes.map((x) => (
-                    <Select.Option key={x.id} value={x.id} title={x.description}>
-                      <IssueLabel {...x} />
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="Sprint" name="sprint">
-                <JiraSuggest group data={sprintData} onDataChange={setSprintData} fetcher={sprintFetcher} />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="模块" name="components">
-                <Select
-                  showSearch
-                  mode={'multiple'}
-                  optionFilterProp="children"
-                  filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                >
-                  {jiraComponents.map((comp) => (
-                    <Select.Option key={comp.id} value={comp.id}>
-                      {comp.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
+        {!!fields.length && (
+          <Form
+            initialValues={omitBy(
+              {
+                dod: hasKey('customfield_10506') ? '10241' : null,
+                issuetype: hasKey('issuetype') ? '10001' : null
+              },
+              isNil
+            )}
+            className={c('__common-form')}
+            form={form}
+            labelCol={labelCol}
+          >
+            <Row gutter={24}>
+              {hasKey('issuetype') && (
+                <Col span={8}>
+                  <Form.Item label="父 Issue 类型" name="issuetype">
+                    <Select>
+                      {issueTypes.map((x) => (
+                        <Select.Option key={x.id} value={x.id} title={x.description}>
+                          <IssueLabel {...x} />
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
+              {hasKey('customfield_10004') && (
+                <Col span={8}>
+                  <Form.Item label="Sprint" name="sprint">
+                    <JiraSuggest group data={sprintData} onDataChange={setSprintData} fetcher={sprintFetcher} />
+                  </Form.Item>
+                </Col>
+              )}
+              <Col span={8}>
+                {hasKey('components') && (
+                  <Form.Item label="模块" name="components">
+                    <Select
+                      showSearch
+                      mode={'multiple'}
+                      optionFilterProp="children"
+                      filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                    >
+                      {jiraComponents.map((comp) => (
+                        <Select.Option key={comp.id} value={comp.id}>
+                          {comp.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                )}
+              </Col>
+            </Row>
 
-          <Row gutter={24}>
-            <Col span={8}>
-              <Form.Item label="Epic Link" name="epicLink">
-                <JiraSuggest
-                  group
-                  fetcher={async (val) => {
-                    const res = await jiraApi.querySuggestEpics({
-                      searchQuery: val
-                    })
-                    return res.data.epicLists.reduce((acc, group) => {
-                      acc[group.listDescriptor] = group.epicNames.map((d) => {
-                        return {
-                          label: (
-                            <span>
-                              <span>{d.name} - </span>
-                              <span style={{ color: '#ccc' }}>({d.key})</span>
-                            </span>
-                          ),
-                          value: d.key
+            <Row gutter={24}>
+              <Col span={8}>
+                {hasKey('components') && (
+                  <Form.Item label="Epic Link" name="epicLink">
+                    <JiraSuggest
+                      group
+                      fetcher={async (val) => {
+                        const res = await jiraApi.querySuggestEpics({
+                          searchQuery: val
+                        })
+                        return res.data.epicLists.reduce((acc, group) => {
+                          acc[group.listDescriptor] = group.epicNames.map((d) => {
+                            return {
+                              label: (
+                                <span>
+                                  <span>{d.name} - </span>
+                                  <span style={{ color: '#ccc' }}>({d.key})</span>
+                                </span>
+                              ),
+                              value: d.key
+                            }
+                          })
+                          return acc
+                        }, {})
+                      }}
+                    />
+                  </Form.Item>
+                )}
+              </Col>
+
+              <Col span={8}>
+                {hasKey('priority') && (
+                  <Form.Item label={'优先级'} name={'priority'}>
+                    <Select>
+                      <Select.Option value={'Highest'}>Highest</Select.Option>
+                      <Select.Option value={'High'}>High</Select.Option>
+                      <Select.Option value={'Medium'}>Medium</Select.Option>
+                      <Select.Option value={'Low'}>Low</Select.Option>
+                    </Select>
+                  </Form.Item>
+                )}
+              </Col>
+
+              <Col span={8}>
+                {hasKey('labels') && (
+                  <Form.Item label="标签" name="labels">
+                    <JiraSuggest
+                      group
+                      fetcher={async (input) => {
+                        if (!input) {
+                          return []
                         }
-                      })
-                      return acc
-                    }, {})
-                  }}
-                />
-              </Form.Item>
-            </Col>
+                        const res = await jiraApi.querySuggestLabels(input)
+                        if (res.data?.suggestions) {
+                          return {
+                            建议: res.data?.suggestions.map((x) => ({
+                              value: x.label,
+                              label: <span dangerouslySetInnerHTML={{ __html: x.html }} />
+                            }))
+                          }
+                        }
+                      }}
+                      mode={'tags'}
+                    />
+                  </Form.Item>
+                )}
+              </Col>
+            </Row>
 
-            <Col span={8}>
-              <Form.Item label={'优先级'} name={'priority'}>
-                <Select>
-                  <Select.Option value={'Highest'}>Highest</Select.Option>
-                  <Select.Option value={'High'}>High</Select.Option>
-                  <Select.Option value={'Medium'}>Medium</Select.Option>
-                  <Select.Option value={'Low'}>Low</Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
+            <Row gutter={24}>
+              <Col span={8}>
+                {hasKey('assignee') && (
+                  <Form.Item label="经办人" name="assignee">
+                    <UserSuggest jiraApi={jiraApi} />
+                  </Form.Item>
+                )}
+              </Col>
 
-            <Col span={8}>
-              <Form.Item shouldUpdate={(prevValues, nextValues) => prevValues.issuetype !== nextValues.issuetype}>
-                {(instance) => {
-                  return (
-                    (!instance.getFieldsValue().issuetype || instance.getFieldsValue().issuetype === '10001') && (
-                      <Form.Item label={'DoD'} name={'dod'} labelCol={labelCol} style={{ marginBottom: 0 }}>
-                        <Select allowClear>
-                          <Select.Option value={'-1'}>无</Select.Option>
-                          <Select.Option value={'10241'}>上线</Select.Option>
-                          <Select.Option value={'10242'}>上线并隐藏入口</Select.Option>
-                          <Select.Option value={'10243'}>上测试</Select.Option>
-                          <Select.Option value={'10244'}>及时上线</Select.Option>
-                        </Select>
-                      </Form.Item>
-                    )
-                  )
-                }}
-              </Form.Item>
-            </Col>
-          </Row>
+              <Col span={8}>
+                {hasKey('reporter') && (
+                  <Form.Item label="报告人" name="reporter" initialValue={JIRA.Users.LoggedInUser.userName()}>
+                    <UserSuggest jiraApi={jiraApi} />
+                  </Form.Item>
+                )}
+              </Col>
 
-          <Row gutter={24}>
-            <Col span={8}>
-              <Form.Item label="经办人" name="assignee">
-                <UserSuggest jiraApi={jiraApi} />
-              </Form.Item>
-            </Col>
+              <Col span={8}>
+                {hasKey('customfield_10506') && (
+                  <Form.Item shouldUpdate={(prevValues, nextValues) => prevValues.issuetype !== nextValues.issuetype}>
+                    {(instance) => {
+                      return (
+                        (!instance.getFieldsValue().issuetype || instance.getFieldsValue().issuetype === '10001') && (
+                          <Form.Item label={'DoD'} name={'dod'} labelCol={labelCol} style={{ marginBottom: 0 }}>
+                            <Select allowClear>
+                              <Select.Option value={'-1'}>无</Select.Option>
+                              <Select.Option value={'10241'}>上线</Select.Option>
+                              <Select.Option value={'10242'}>上线并隐藏入口</Select.Option>
+                              <Select.Option value={'10243'}>上测试</Select.Option>
+                              <Select.Option value={'10244'}>及时上线</Select.Option>
+                            </Select>
+                          </Form.Item>
+                        )
+                      )
+                    }}
+                  </Form.Item>
+                )}
+              </Col>
+            </Row>
 
-            <Col span={8}>
-              <Form.Item label="报告人" name="reporter">
-                <UserSuggest jiraApi={jiraApi} />
-              </Form.Item>
-            </Col>
-
-            <Col span={8}>
-              <Form.Item label="标签" name="labels">
-                <JiraSuggest
-                  group
-                  fetcher={async (input) => {
-                    if (!input) {
-                      return []
-                    }
-                    const res = await jiraApi.querySuggestLabels(input)
-                    if (res.data?.suggestions) {
-                      return {
-                        建议: res.data?.suggestions.map((x) => ({
-                          value: x.label,
-                          label: <span dangerouslySetInnerHTML={{ __html: x.html }} />
-                        }))
-                      }
-                    }
-                  }}
-                  mode={'tags'}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={24}></Row>
-        </Form>
+            <Row gutter={24} />
+          </Form>
+        )}
 
         <div style={{ marginTop: 6, marginBottom: 10 }}>
           <div style={{ marginBottom: 10 }}>

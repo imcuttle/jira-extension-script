@@ -4,6 +4,7 @@ import { notification, Typography } from 'antd'
 import React from 'react'
 import cookie from 'js-cookie'
 import url from 'url'
+import { omitBy, isNil } from 'lodash'
 
 /**
  * /rest/greenhopper/1.0/sprint/picker?query=
@@ -176,6 +177,16 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
+  async queryFields() {
+    const response = await this.request({
+      method: 'get',
+      baseURL: url.format({ host: url.parse(this.axios.defaults.baseURL || '').host, pathname: '' }),
+      url: '/secure/QuickCreateIssue!default.jspa?decorator=none',
+      params: {}
+    })
+    return response.data?.fields || []
+  }
+
   private _createIssueReqBody({
     estimate,
     priority,
@@ -185,7 +196,7 @@ export default class JiraApiBrowser extends JiraApi {
     assignee,
     labels,
     dod,
-    reporter = JIRA.Users.LoggedInUser.userName(),
+    reporter,
     ...data
   }: {
     estimate?: number
@@ -199,37 +210,40 @@ export default class JiraApiBrowser extends JiraApi {
     priority?: string
     [prop: string]: any
   } = {}) {
-    const config = merge(
-      {
-        customfield_10002: estimate,
-        customfield_10004: sprint,
-        customfield_10506: dod && {
-          id: dod
+    const config = omitBy(
+      merge(
+        {
+          customfield_10002: estimate,
+          customfield_10004: sprint,
+          customfield_10506: dod != null && {
+            id: dod
+          },
+          customfield_10005: epicLink,
+          project: {
+            key: JIRA.API.Projects.getCurrentProjectKey()
+          },
+          // https://jira.zhenguanyu.com/rest/api/2/project/$PROJECT  可以获取 issuetype 列表
+          issuetype: issuetype != null && {
+            id: issuetype
+          },
+          assignee: {
+            name: assignee
+          },
+          reporter: reporter != null && {
+            name: reporter
+          },
+          labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug']
+            .concat(labels)
+            .filter(Boolean),
+          priority: priority != null && {
+            // Low Medium High
+            name: priority || 'Low'
+            // id: '20000'
+          }
         },
-        customfield_10005: epicLink,
-        project: {
-          key: JIRA.API.Projects.getCurrentProjectKey()
-        },
-        // https://jira.zhenguanyu.com/rest/api/2/project/$PROJECT  可以获取 issuetype 列表
-        issuetype: {
-          id: issuetype
-        },
-        assignee: {
-          name: assignee
-        },
-        reporter: {
-          name: reporter
-        },
-        labels: [process.env.NODE_ENV === 'production' ? 'jira-import' : 'jira-import__debug']
-          .concat(labels)
-          .filter(Boolean),
-        priority: {
-          // Low Medium High
-          name: priority || 'Low'
-          // id: '20000'
-        }
-      },
-      data
+        data
+      ),
+      (x) => isNil(x) || x === false
     )
 
     if (!assignee) {
