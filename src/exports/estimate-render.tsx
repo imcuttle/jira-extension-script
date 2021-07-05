@@ -1,12 +1,13 @@
 import pizza from 'react-pizza'
-import React from 'react'
-import { Form, InputNumber } from 'antd'
+import React, { useState } from 'react'
+import { Form, InputNumber, notification, Spin } from 'antd'
 import { isNotIssueReady, isNotReady, useToken } from '../shared/utils'
 import JiraApiBrowser from '../shared/jira-api-browser'
 
 const EstimateComponent: React.FC<{}> = function () {
   const [form] = Form.useForm()
   const [token] = useToken()
+  const [loading, setLoading] = useState(false)
   const jiraApi = React.useMemo(
     () =>
       new JiraApiBrowser({
@@ -15,19 +16,24 @@ const EstimateComponent: React.FC<{}> = function () {
     [token]
   )
   const update = () => {
-    jiraApi.updateIssue(JIRA.Issue.getIssueId(), form.getFieldsValue())
+    if (loading) {
+      return
+    }
+    setLoading(true)
+    jiraApi.updateIssue(JIRA.Issue.getIssueId(), form.getFieldsValue()).finally(() => {
+      setLoading(false)
+    })
   }
 
   React.useEffect(() => {
     if (JIRA.Issue.getIssueKey()) {
-      jiraApi.queryIssue(JIRA.Issue.getIssueKey())
-        .then((res: any) => {
-          if (res.data.fields) {
-            form.setFieldsValue({
-              estimate: res.data.fields.customfield_10002
-            })
-          }
-        })
+      jiraApi.queryIssue(JIRA.Issue.getIssueKey()).then((res: any) => {
+        if (res.data.fields) {
+          form.setFieldsValue({
+            estimate: res.data.fields.customfield_10002
+          })
+        }
+      })
     }
   }, [JIRA.Issue.getIssueKey()])
 
@@ -36,9 +42,11 @@ const EstimateComponent: React.FC<{}> = function () {
   }
 
   return (
-    <Form form={form} style={{ marginTop: 15 }} size={'small'}>
+    <Form form={form} style={{ marginTop: 15 }} size={'small'} layout={'inline'}>
       <Form.Item name={'estimate'} label={'Estimate'} labelCol={{ style: { width: 90 } }}>
-        <InputNumber onBlur={update} />
+        <Spin spinning={loading} delay={500}>
+          <InputNumber onBlur={update} />
+        </Spin>
       </Form.Item>
     </Form>
   )

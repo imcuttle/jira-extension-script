@@ -115,11 +115,11 @@ export default class JiraApiBrowser extends JiraApi {
 
     if (toast && res.data.issue) {
       notification.success({
-        message: '更新成功'
+        message: 'Issue 更新成功'
       })
     } else if (toast) {
       notification.error({
-        message: '更新失败'
+        message: 'Issue 更新失败'
       })
     }
   }

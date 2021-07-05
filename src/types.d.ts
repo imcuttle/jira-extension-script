@@ -9,6 +9,8 @@ declare var JIRA: {
   Issue: {
     getIssueKey(): string
     getIssueId(): string
+    refreshSubtasks(): void;
+    reload(): void;
   }
 
   Users: {

@@ -48,7 +48,6 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
     })
   }, [JIRA.Issue.getIssueKey()])
 
-
   if (!token || isNotReady() || isNotIssueReady()) {
     return null
   }
@@ -78,6 +77,7 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       }
       okButtonProps={{ loading }}
       onConfirm={async () => {
+        const issueKey = JIRA.Issue.getIssueKey()
         const subKeys = getSubKeys()
         if (subKeys.length) {
           setLoading(true)
@@ -88,6 +88,20 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
             }))
           )
           setLoading(false)
+
+          const backlogContainer = document.querySelector('#ghx-rabid')
+          if (backlogContainer) {
+            const itemDom: HTMLDivElement = backlogContainer.querySelector(
+              `[data-issue-key=${JSON.stringify(issueKey)}]`
+            )
+            if (itemDom && itemDom.click) {
+              itemDom.click()
+            }
+          } else {
+            // 详情页
+            JIRA.Issue?.reload?.()
+          }
+
           notification.success({ message: '子任务更新经办人成功' })
         }
       }}
