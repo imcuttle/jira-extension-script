@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react'
 import omitNil from 'omit-nil'
+import { robust } from 'memoize-fn'
 import {
   Button,
   Dropdown,
@@ -58,7 +59,7 @@ const JiraModalImport = React.forwardRef<
   const [input, setInput] = React.useState('')
   const [issueTypes, setIssueTypes] = React.useState([])
 
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState<boolean | string>(false)
 
   const onImportInputKeydown = React.useCallback((evt) => {
     const isCollapsed = evt.target.selectionEnd === evt.target.selectionStart
@@ -75,12 +76,17 @@ const JiraModalImport = React.forwardRef<
     [token]
   )
   const [fields, setFields] = React.useState<Array<{ id: string }>>([])
+  const queryFields = React.useCallback(
+    () => {
+      return jiraApi.queryFields()
+    },
+    [jiraApi, JIRA.API.Projects.getCurrentProjectKey()]
+  )
 
   React.useEffect(() => {
-    if (props.visible) {
-      setLoading(true)
-      jiraApi
-        .queryFields()
+    if (props.visible && JIRA.API.Projects.getCurrentProjectKey()) {
+      setLoading('加载 Issue 配置...')
+      queryFields()
         .then((fields) => {
           setFields(fields)
         })
@@ -90,7 +96,7 @@ const JiraModalImport = React.forwardRef<
     } else {
       setFields([])
     }
-  }, [props.visible, jiraApi, setFields])
+  }, [props.visible, queryFields, setFields])
 
   const [form] = Form.useForm()
   const [parseOptions, setParseOptions] = React.useState({
@@ -166,7 +172,7 @@ const JiraModalImport = React.forwardRef<
       title={'导入jira'}
       wrapClassName={c('__wrapper')}
       {...props}
-      confirmLoading={loading}
+      confirmLoading={!!loading}
       onOk={async (e) => {
         const mdast = importPreviewRef.current?.mdast
         if (mdast) {
@@ -252,7 +258,7 @@ const JiraModalImport = React.forwardRef<
       }}
       width={1200}
     >
-      <Spin size={'large'} spinning={loading}>
+      <Spin size={'large'} spinning={!!loading} tip={!!loading && typeof loading !== 'boolean' && loading} delay={500}>
         <div style={{ marginBottom: 10 }}>
           <span style={{ fontSize: 17, fontWeight: 'bold', marginRight: 6 }}>公共配置</span>
         </div>

@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react'
-import { Button, Dropdown, Menu, Input, Modal, Drawer, Typography, ConfigProvider, notification } from 'antd'
+import { Button, Dropdown, Menu, Input, Tooltip, Modal, Drawer, Typography, ConfigProvider, notification } from 'antd'
 import p from 'prefix-classname'
 import zhCN from 'antd/es/locale/zh_CN'
 
@@ -8,7 +8,7 @@ const c = p('jira_portal')
 
 import './style.sass'
 import JiraModalImport from '../modal-import'
-import {isNotReady, useToken} from '../../shared/utils'
+import { isNotReady, useToken } from '../../shared/utils'
 
 const JiraPortal: React.FC<{}> = ({}) => {
   const [state, dispatch] = useReducer(
@@ -34,7 +34,12 @@ const JiraPortal: React.FC<{}> = ({}) => {
   return (
     <ConfigProvider locale={zhCN}>
       <div className={c()}>
-        <Button onClick={() => dispatch({ value: { visible: true } })} type={'dashed'} shape={'round'}>
+        <Button
+          className={c('__btn')}
+          onClick={() => dispatch({ value: { visible: true } })}
+          type={'dashed'}
+          shape={'round'}
+        >
           Jira 工具
         </Button>
 

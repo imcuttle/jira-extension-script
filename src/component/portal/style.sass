@@ -1,8 +1,16 @@
 $prefix: jira_portal
 
 .#{$prefix}
-  &
+  &__btn
+    transition: transform ease-in .2s
     position: fixed
-    right: 30px
+    right: 0
     bottom: 20px
     z-index: 1000
+    box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d
+    transform: translateX(50%)
+    border-top-right-radius: 0
+    border-bottom-right-radius: 0
+
+    &:hover
+      transform: translateX(0px)

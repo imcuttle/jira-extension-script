@@ -82,6 +82,7 @@
     "lodash.merge": "^4.6.2",
     "lodash.uniq": "^4.5.0",
     "marked": "^2.0.0",
+    "memoize-fn": "^2.0.1",
     "min-qs": "^1.4.0",
     "min-util": "^3.6.1",
     "omit-nil": "^1.0.2",

@@ -24,7 +24,6 @@ const getSubKeys = () => {
 const SubtasksAssigneeComponent: React.FC<{}> = function () {
   const [form] = Form.useForm()
   const [token] = useToken()
-  const [defaultValue, setDefaultValue] = React.useState()
   const jiraApi = React.useMemo(
     () =>
       new JiraApiBrowser({
@@ -32,9 +31,6 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       }),
     [token]
   )
-  const update = () => {
-    jiraApi.updateIssue(JIRA.Issue.getIssueId(), form.getFieldsValue())
-  }
   const [loading, setLoading] = React.useState(false)
   const [user, setUser] = React.useState(undefined)
   React.useEffect(() => {
@@ -48,12 +44,12 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
           user = res.data.fields.assignee.key
         }
       }
-      setUser(user)
+      setUser(user || JIRA?.Users?.LoggedInUser?.userName())
     })
   }, [JIRA.Issue.getIssueKey()])
 
 
-  if (user === undefined || !token || isNotReady() || isNotIssueReady()) {
+  if (!token || isNotReady() || isNotIssueReady()) {
     return null
   }
 
@@ -78,7 +74,6 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
           style={{ width: 160 }}
           size={'small'}
           placeholder={'设置经办人'}
-          defaultValue={defaultValue}
         />
       }
       okButtonProps={{ loading }}
@@ -93,7 +88,7 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
             }))
           )
           setLoading(false)
-          notification.success({ message: '更新成功' })
+          notification.success({ message: '子任务更新经办人成功' })
         }
       }}
     >
