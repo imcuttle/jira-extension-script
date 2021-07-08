@@ -43,9 +43,13 @@ const EstimateComponent: React.FC<{}> = function () {
 
   return (
     <Form form={form} style={{ marginTop: 15 }} size={'small'} layout={'inline'}>
-      <Form.Item name={'estimate'} label={'Estimate'} labelCol={{ style: { width: 90 } }}>
+      <Form.Item label={'Estimate'} labelCol={{ style: { width: 90 } }}>
         <Spin spinning={loading} delay={500}>
-          <InputNumber onBlur={update} />
+          <Form.Item name={'estimate'} noStyle>
+            <InputNumber
+              onBlur={update}
+            />
+          </Form.Item>
         </Spin>
       </Form.Item>
     </Form>

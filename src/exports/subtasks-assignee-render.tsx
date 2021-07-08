@@ -22,7 +22,6 @@ const getSubKeys = () => {
 }
 
 const SubtasksAssigneeComponent: React.FC<{}> = function () {
-  const [form] = Form.useForm()
   const [token] = useToken()
   const jiraApi = React.useMemo(
     () =>
@@ -37,9 +36,6 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
     jiraApi.queryIssue(JIRA.Issue.getIssueKey()).then((res: any) => {
       let user = null
       if (res.data.fields) {
-        form.setFieldsValue({
-          estimate: res.data.fields.customfield_10002
-        })
         if (res.data.fields.assignee) {
           user = res.data.fields.assignee.key
         }
