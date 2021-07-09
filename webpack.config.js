@@ -11,9 +11,10 @@ module.exports = {
   output: {
     library: isDev ? '_JiraExtensionScript' : 'JiraExtensionScript',
     libraryTarget: 'umd',
-    publicPath: isDev ? 'http://localhost:8080' : 'auto'
+    publicPath: isDev ? 'https://localhost:8080' : 'auto'
   },
   devServer: {
+    https: true
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.wasm']

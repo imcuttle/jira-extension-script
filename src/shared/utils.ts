@@ -1,6 +1,7 @@
 import lodashGet from 'lodash.get'
-import React from 'react'
+import React, { useRef } from 'react'
 import { EventEmitter } from 'events'
+import JiraApiBrowser from './jira-api-browser'
 
 export const isNotReady = () =>
   typeof JIRA === 'undefined' ||
@@ -10,21 +11,49 @@ export const isNotReady = () =>
 export const isNotIssueReady = () =>
   typeof JIRA === 'undefined' || !lodashGet(JIRA, 'Issue.getIssueKey', () => undefined)()
 
-const tokenEmitter = new EventEmitter()
 export const useToken = () => {
-  const result = React.useState<string>(localStorage.getItem('jira:api-token') || '')
-  React.useEffect(() => {
-    tokenEmitter.emit('changed', result[0])
-    localStorage.setItem('jira:api-token', result[0])
-  }, [result[0]])
+  return useSharedValue('jira:api-token')
+}
+
+const safeParse = (v) => {
+  try {
+    if (typeof v !== 'string') {
+      return v
+    }
+    return JSON.parse(v)
+  } catch (e) {
+    return v
+  }
+}
+
+const sharedEmitter = new EventEmitter()
+export function useSharedValue<T = any>(key: string, defaultVal?: T) {
+  const result = React.useState<T>(safeParse(localStorage.getItem(key) || null) ?? defaultVal)
 
   React.useEffect(() => {
-    const handler = (token) => {
-      result[1](token)
+    sharedEmitter.emit(`${key}:changed`, result[0])
+    localStorage.setItem(key, JSON.stringify(result[0]))
+  }, [result[0], key])
+
+  React.useEffect(() => {
+    const handler = (v) => {
+      result[1](v)
     }
-    tokenEmitter.addListener('changed', handler)
-    return () => tokenEmitter.removeListener('changed', handler)
-  }, [result[1]])
+    sharedEmitter.addListener(`${key}:changed`, handler)
+    return () => sharedEmitter.removeListener(`${key}:changed`, handler)
+  }, [result[1], key])
 
   return result
+}
+
+export function useJiraApi() {
+  const [token] = useToken()
+  return React.useMemo(
+    () =>
+      !!token &&
+      new JiraApiBrowser({
+        password: token
+      }),
+    [token]
+  )
 }

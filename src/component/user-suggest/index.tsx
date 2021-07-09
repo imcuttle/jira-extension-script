@@ -1,11 +1,15 @@
 import { JiraSuggest } from '../epic-link-suggest'
-import React from 'react'
+import React, { ComponentProps } from 'react'
 import { Avatar } from 'antd'
 import p from 'prefix-classname'
+import JiraApiBrowser from '../../shared/jira-api-browser'
 
 const c = p('jira_user-suggest')
 
-export default function UserSuggest({ jiraApi, ...props }: any) {
+export default function UserSuggest({
+  jiraApi,
+  ...props
+}: Partial<ComponentProps<typeof JiraSuggest>> & { jiraApi: JiraApiBrowser }) {
   const userFetcher = async (val) => {
     const res = await jiraApi.querySuggestUsers({
       query: val

@@ -7,13 +7,17 @@ import JiraPortal from './component/portal'
 
 export const render = pizza(JiraPortal)
 
+import estimateRender from './exports/estimate-render'
 export { default as estimateRender } from './exports/estimate-render'
-import { default as estimateRender } from './exports/estimate-render'
-import { default as subtasksAssigneeRender } from './exports/subtasks-assignee-render'
+import subtasksAssigneeRender from './exports/subtasks-assignee-render'
 export { default as subtasksAssigneeRender } from './exports/subtasks-assignee-render'
+import hotkeyRender from './exports/hotkey-render'
+export { default as hotkeyRender } from './exports/hotkey-render'
+
 export function polyfillRender() {
   estimateRender()
   subtasksAssigneeRender()
+  hotkeyRender()
 }
 
 // dev 环境开了 hot-client 所以 umd 打包 export 有问题，所以用这种方式解决

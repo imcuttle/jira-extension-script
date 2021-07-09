@@ -1,5 +1,18 @@
 import React, { useReducer } from 'react'
-import { Button, Dropdown, Menu, Input, Tooltip, Modal, Drawer, Typography, ConfigProvider, notification } from 'antd'
+import {
+  Button,
+  Dropdown,
+  Menu,
+  Input,
+  Tooltip,
+  Modal,
+  Drawer,
+  Typography,
+  ConfigProvider,
+  notification,
+  Form,
+  Switch
+} from 'antd'
 import p from 'prefix-classname'
 import zhCN from 'antd/es/locale/zh_CN'
 
@@ -8,7 +21,11 @@ const c = p('jira_portal')
 
 import './style.sass'
 import JiraModalImport from '../modal-import'
-import { isNotReady, useToken } from '../../shared/utils'
+import {isNotReady, useSharedValue, useToken} from '../../shared/utils'
+
+const initialVal = {
+  overwriteShortcut: true
+}
 
 const JiraPortal: React.FC<{}> = ({}) => {
   const [state, dispatch] = useReducer(
@@ -30,6 +47,9 @@ const JiraPortal: React.FC<{}> = ({}) => {
     console.error('JIRA defined load failed')
     return null
   }
+
+  const [settingForm] = Form.useForm()
+  const [setting, setSetting] = useSharedValue('jira-extension-setting', initialVal)
 
   return (
     <ConfigProvider locale={zhCN}>
@@ -79,6 +99,21 @@ const JiraPortal: React.FC<{}> = ({}) => {
                 石墨 / Markdown 导入
               </Button>
             </Typography.Paragraph>
+
+            <Typography.Paragraph style={{ marginTop: 20, marginBottom: 4 }}>
+              <Typography.Text style={{ fontWeight: 'bold', fontSize: 18 }}>设置</Typography.Text>
+            </Typography.Paragraph>
+            <Form
+              form={settingForm}
+              initialValues={setting}
+              onFieldsChange={(v, ...a) => {
+                setSetting(settingForm.getFieldsValue())
+              }}
+            >
+              <Form.Item help={'是否覆盖原始的快捷键，如 A'} name={'overwriteShortCut'} label={'快捷键覆盖'} valuePropName={'checked'}>
+                <Switch disabled={!token} />
+              </Form.Item>
+            </Form>
           </div>
         </Drawer>
 

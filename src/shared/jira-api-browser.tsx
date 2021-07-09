@@ -34,6 +34,15 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
+  async search(jql) {
+    return this.request({
+      url: `/search`,
+      params: {
+        jql
+      }
+    })
+  }
+
   async setAssignees(dataList) {
     return Promise.all(
       dataList.map(({ issueIdOrKey, assignee }) => {
