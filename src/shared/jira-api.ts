@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+axios.defaults.validateStatus = (s) => s < 400
 
 export default class JiraApi {
   constructor(

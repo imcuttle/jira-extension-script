@@ -1,11 +1,12 @@
 import pizza from 'react-pizza'
 import { HotKeyChainManager } from 'hotkey-chain'
 import lazy from 'lazy-value'
+import uniqBy from 'lodash.uniqby'
 import React from 'react'
 import open from '@rcp/util.open'
 
 import { useJiraApi, useSharedValue, useToken } from '../shared/utils'
-import { Form, Modal, notification, Spin, Switch, Tooltip, Typography } from 'antd'
+import { Alert, Form, Modal, notification, Spin, Switch, Tooltip, Typography } from 'antd'
 import uniq from 'lodash.uniq'
 import { getIssueKeys } from '../shared/jira-helper'
 import UserSuggest from '../component/user-suggest'
@@ -20,7 +21,8 @@ const getDom = lazy(() => {
 })
 
 const initialValue = {
-  assigneeSubTask: true
+  assigneeSubTask: true,
+  assigneeParentTask: true
 }
 
 function AssignModal({ cb, keys, jiraApi }: any) {
@@ -65,10 +67,40 @@ function AssignModal({ cb, keys, jiraApi }: any) {
     })
   }, [])
 
+  const { parents, subtasks } = React.useMemo(() => {
+    const parents = []
+    const subtasks = []
+    data.forEach((issue) => {
+      if (issue.fields.parent?.key) {
+        parents.push(issue.fields.parent)
+      }
+      if (issue.fields?.subtasks?.length) {
+        subtasks.push(...issue.fields?.subtasks)
+      }
+    })
+    return { parents: uniqBy(parents, 'key'), subtasks: uniqBy(subtasks, 'key') }
+  }, [data, setting.assigneeSubTask])
+
+  const renderFields = (fields) => {
+    return fields.map((field) => (
+      <Tooltip key={field.key} title={field.fields?.summary}>
+        <Typography.Link
+          strong
+          href={`/browse/${field.key}`}
+          target={'_blank'}
+          style={{ paddingLeft: 3, paddingRight: 3 }}
+        >
+          {field.key}
+        </Typography.Link>
+      </Tooltip>
+    ))
+  }
+
   return (
     <Modal
       okText={'分配'}
       confirmLoading={isLoading}
+      width={600}
       visible
       title={'分配任务'}
       onOk={async () => {
@@ -76,19 +108,18 @@ function AssignModal({ cb, keys, jiraApi }: any) {
         if (values) {
           try {
             await (jiraApi as JiraApiBrowser).setAssignees(
-              keys.map((issueIdOrKey) => ({
-                issueIdOrKey,
-                assignee: values.assignee
-              }))
+              data
+                .concat(values.assigneeParentTask ? parents : [], values.assigneeSubTask ? subtasks : [])
+                .map((issue) => ({
+                  issueIdOrKey: issue.key,
+                  assignee: { name: values.assignee }
+                }))
             )
-            if (values.assigneeSubTask) {
-
-            }
             notification.success({
               message: '分配任务成功'
             })
           } catch (e) {
-            notification.success({
+            notification.error({
               message: '分配任务失败'
             })
           }
@@ -98,42 +129,59 @@ function AssignModal({ cb, keys, jiraApi }: any) {
     >
       <Spin spinning={isLoading}>
         <Typography.Paragraph>
-          分配{' '}
-          {keys.map((key) => (
-            <Tooltip key={key} title={data.find((x) => x.key === key)?.fields?.summary}>
-              <Typography.Link
-                strong
-                href={`/browse/${key}`}
-                target={'_blank'}
-                style={{ paddingLeft: 3, paddingRight: 3 }}
-              >
-                {key}
-              </Typography.Link>
-            </Tooltip>
-          ))}{' '}
-          任务
+          <Alert
+            message={
+              <>
+                <Typography.Paragraph>分配：{renderFields(data)} Issue</Typography.Paragraph>
+                {!!parents.length && setting.assigneeParentTask && (
+                  <Typography.Paragraph>父 Issues：{renderFields(parents)}</Typography.Paragraph>
+                )}
+                {!!subtasks.length && setting.assigneeSubTask && (
+                  <Typography.Paragraph>子 Issues：{renderFields(subtasks)}</Typography.Paragraph>
+                )}
+                {
+                  <Typography.Paragraph>
+                    总共分配：
+                    {((setting.assigneeSubTask && subtasks.length) || 0) +
+                      ((setting.assigneeParentTask && parents.length) || 0) +
+                      data.length}{' '}
+                    个 Issue
+                  </Typography.Paragraph>
+                }
+              </>
+            }
+            type="info"
+          />
         </Typography.Paragraph>
+
         <Form
           form={form}
-          labelCol={{ style: { width: 80 } }}
+          labelCol={{ style: { width: 100 } }}
           onFieldsChange={(changes) => {
             let change
             if (
               (change = changes.find((change) => {
                 // @ts-ignore
-                return change.name?.includes('assigneeSubTask')
+                return change.name?.find((x) => Object.keys(initialValue).includes(x))
               }))
             ) {
-              setSetting((v) => ({ ...v, assigneeSubTask: change.value }))
+              setSetting((v) => ({ ...v, [change.name[0]]: change.value }))
             }
           }}
         >
           <Form.Item label={'分配于'} name={'assignee'}>
             <UserSuggest jiraApi={jiraApi!} />
           </Form.Item>
-          <Form.Item label={'分配子任务'} name={'assigneeSubTask'} valuePropName={'checked'}>
-            <Switch />
-          </Form.Item>
+          {!!parents.length && (
+            <Form.Item label={'分配父Issue'} name={'assigneeParentTask'} valuePropName={'checked'}>
+              <Switch />
+            </Form.Item>
+          )}
+          {!!subtasks.length && (
+            <Form.Item label={'分配子Issue'} name={'assigneeSubTask'} valuePropName={'checked'}>
+              <Switch />
+            </Form.Item>
+          )}
         </Form>
       </Spin>
     </Modal>
@@ -146,13 +194,13 @@ function HotKey() {
   const jiraApi = useJiraApi()
 
   React.useEffect(() => {
-    if (!setting?.overwriteShortCut || !token) {
+    if (!setting?.overwriteShortcut || !token) {
       return
     }
     const m = new HotKeyChainManager(window.document as any)
       .on('a', (event: KeyboardEvent, next) => {
         // @ts-ignore
-        if (event.target.tagName === 'BODY') {
+        if (!['TEXTAREA', 'INPUT'].includes(event.target.tagName) && event.target.contentEditable !== true) {
           event.preventDefault()
           const keys = getIssueKeys()
           if (!keys.length) {
@@ -165,7 +213,7 @@ function HotKey() {
       })
       .start()
     return () => m.stop()
-  }, [setting?.overwriteShortCut, token, jiraApi])
+  }, [setting?.overwriteShortcut, token, jiraApi])
 
   return null
 }

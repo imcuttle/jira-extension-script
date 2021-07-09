@@ -110,7 +110,7 @@ const JiraPortal: React.FC<{}> = ({}) => {
                 setSetting(settingForm.getFieldsValue())
               }}
             >
-              <Form.Item help={'是否覆盖原始的快捷键，如 A'} name={'overwriteShortCut'} label={'快捷键覆盖'} valuePropName={'checked'}>
+              <Form.Item help={'是否覆盖原始的快捷键，如 A'} name={'overwriteShortcut'} label={'快捷键覆盖'} valuePropName={'checked'}>
                 <Switch disabled={!token} />
               </Form.Item>
             </Form>

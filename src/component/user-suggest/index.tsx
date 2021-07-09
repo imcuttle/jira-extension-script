@@ -25,7 +25,7 @@ export default function UserSuggest({
             />
           </span>
         ),
-        value: user.key
+        value: user.name
       }
     }, {})
   }

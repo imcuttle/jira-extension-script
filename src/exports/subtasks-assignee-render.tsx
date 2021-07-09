@@ -1,13 +1,17 @@
 import pizza from 'react-pizza'
 import React from 'react'
 import uniq from 'lodash.uniq'
-import { Form, InputNumber, notification, Popconfirm, Popover } from 'antd'
+import isEq from 'lodash.isequal'
+import { EventEmitter } from 'events'
+import { Checkbox, Form, InputNumber, notification, Popconfirm, Popover, Tooltip } from 'antd'
 import { css } from '@emotion/css'
 import setIntervalCheck from 'interval-check'
+import domify from 'domify'
 import { isNotIssueReady, isNotReady, useToken } from '../shared/utils'
 import JiraApiBrowser from '../shared/jira-api-browser'
 import { UserAddOutlined, LoadingOutlined } from '@ant-design/icons'
 import UserSuggest from '../component/user-suggest'
+import useForceUpdate from '../shared/hooks/use-forceupdate'
 
 const getSubKeys = () => {
   const table = document.querySelector('#issuetable, #subtasks .ghx-container .aui')
@@ -21,7 +25,7 @@ const getSubKeys = () => {
   )
 }
 
-const SubtasksAssigneeComponent: React.FC<{}> = function () {
+const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean, subtaskKeys: any[] }> = function ({ disabled, subtaskKeys }) {
   const [token] = useToken()
   const jiraApi = React.useMemo(
     () =>
@@ -53,7 +57,7 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       okText={'确定'}
       cancelText={'取消'}
       icon={null}
-      disabled={loading}
+      disabled={loading || disabled}
       placement={'topRight'}
       overlayClassName={css`
         & .ant-popover-message-title {
@@ -63,6 +67,7 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       overlayStyle={{ zIndex: 200 }}
       title={
         <UserSuggest
+          disabled={disabled}
           onChange={setUser}
           value={user}
           jiraApi={jiraApi}
@@ -71,10 +76,10 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
           placeholder={'设置经办人'}
         />
       }
-      okButtonProps={{ loading }}
+      okButtonProps={{ loading, disabled }}
       onConfirm={async () => {
         const issueKey = JIRA.Issue.getIssueKey()
-        const subKeys = getSubKeys()
+        const subKeys = subtaskKeys;
         if (subKeys.length) {
           setLoading(true)
           await jiraApi.setAssignees(
@@ -105,7 +110,9 @@ const SubtasksAssigneeComponent: React.FC<{}> = function () {
       {loading ? (
         <LoadingOutlined style={{ margin: '0 10px' }} />
       ) : (
-        <UserAddOutlined title={'经办人'} style={{ margin: '0 10px' }} />
+        <Tooltip title={'批量分配子任务' + (disabled ? '，请进行勾选' : '')} placement={'bottom'}>
+          <UserAddOutlined title={'经办人'} style={{ margin: '0 10px' }} disabled={disabled} />
+        </Tooltip>
       )}
     </Popconfirm>
   )
@@ -131,15 +138,21 @@ export default function subtasksAssigneeRender() {
   const dispose = setIntervalCheck(
     null,
     () => {
+      const allSubtaskKeys = []
+      let selectedSubtaskKeys = []
+      const connector = new EventEmitter()
+      const connector2 = new EventEmitter()
+
       const container =
         document.querySelector(`#view-subtasks_heading .ops`) || document.querySelector(`#subtasks_heading .ops`)
+
+      const tbody = document.querySelector(`#subtasks table tbody`) || document.querySelector(`table#issuetable tbody`)
       if (container) {
         if (container.querySelector('.jira-extension-subtasks-assignee')) {
           return false
         }
 
         if (!getSubKeys().length) {
-          dispose()
           return false
         }
 
@@ -147,7 +160,96 @@ export default function subtasksAssigneeRender() {
         elem.classList.add('jira-extension-subtasks-assignee')
         container.prepend(elem)
 
-        pizza(SubtasksAssigneeComponent)(elem, {})
+        pizza(() => {
+          const [subtaskKeys, setSubtaskKeys] = React.useState(selectedSubtaskKeys.slice())
+          React.useEffect(() => {
+            const handle = (keys) => {
+              setSubtaskKeys(keys)
+            }
+            connector.addListener('next', handle)
+            return () => {
+              connector.removeListener('next', handle)
+            }
+          }, [])
+          return <SubtasksAssigneeComponent disabled={!subtaskKeys.length} subtaskKeys={subtaskKeys}/>
+        })(elem, {})
+
+        const td = domify(`<td></td>`)
+        tbody.querySelectorAll('tr').forEach((tr) => {
+          const issueKey = tr.getAttribute('data-issuekey') || tr.getAttribute('data-issue-key')
+          allSubtaskKeys.push(issueKey)
+          selectedSubtaskKeys.push(issueKey)
+          const newTd = td.cloneNode(true)
+          pizza(() => {
+            const [update] = useForceUpdate()
+            React.useEffect(() => {
+              const handle = (checked) => {
+                if (!checked) {
+                  selectedSubtaskKeys = []
+                } else {
+                  selectedSubtaskKeys = allSubtaskKeys.slice()
+                }
+                connector.emit('next', selectedSubtaskKeys.slice())
+                update()
+              }
+              connector2.addListener('next', handle)
+              return () => {
+                connector2.removeListener('next', handle)
+              }
+            }, [update])
+
+            return (
+              <Checkbox
+                checked={selectedSubtaskKeys.includes(issueKey)}
+                onChange={(evt) => {
+                  if (evt.target.checked) {
+                    const i = selectedSubtaskKeys.indexOf(issueKey)
+                    i >= 0 && selectedSubtaskKeys.splice(i, 1)
+                    selectedSubtaskKeys.push(issueKey)
+                  } else {
+                    const i = selectedSubtaskKeys.indexOf(issueKey)
+                    i >= 0 && selectedSubtaskKeys.splice(i, 1)
+                  }
+                  connector.emit('next', selectedSubtaskKeys.slice())
+                  update()
+                }}
+              />
+            )
+          })(newTd, {})
+          tr.prepend(newTd)
+        })
+
+        const elem1 = document.createElement('li')
+        elem1.classList.add('jira-extension-subtasks-assignee-checkout')
+        container.prepend(elem1)
+        pizza(() => {
+          const [checked, setChecked] = React.useState(true)
+          const [subtaskKeys, setSubtaskKeys] = React.useState(selectedSubtaskKeys.slice())
+          React.useEffect(() => {
+            const handle = (keys) => {
+              setSubtaskKeys(keys)
+              setChecked(!!allSubtaskKeys.length && isEq(uniq(allSubtaskKeys).sort(), uniq(keys).sort()))
+            }
+            connector.addListener('next', handle)
+            return () => {
+              connector.removeListener('next', handle)
+            }
+          }, [])
+          return (
+            <Tooltip title={'点击' + (checked ? '取消全选' : '全选')} placement={'bottom'}>
+              <Checkbox
+                checked={checked}
+                indeterminate={!checked && !!subtaskKeys.length}
+                onChange={(e) => {
+                  setChecked(e.target.checked)
+                  connector2.emit('next', e.target.checked)
+                }}
+              />
+            </Tooltip>
+          )
+        })(elem1, {})
+
+        connector.emit('next', selectedSubtaskKeys.slice())
       }
 
       return false
