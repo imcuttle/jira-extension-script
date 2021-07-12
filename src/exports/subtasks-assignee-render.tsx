@@ -25,7 +25,10 @@ const getSubKeys = () => {
   )
 }
 
-const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean, subtaskKeys: any[] }> = function ({ disabled, subtaskKeys }) {
+const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean; subtaskKeys: any[] }> = function ({
+  disabled,
+  subtaskKeys
+}) {
   const [token] = useToken()
   const jiraApi = React.useMemo(
     () =>
@@ -79,7 +82,7 @@ const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean, subtaskKeys: any
       okButtonProps={{ loading, disabled }}
       onConfirm={async () => {
         const issueKey = JIRA.Issue.getIssueKey()
-        const subKeys = subtaskKeys;
+        const subKeys = subtaskKeys
         if (subKeys.length) {
           setLoading(true)
           await jiraApi.setAssignees(
@@ -110,8 +113,18 @@ const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean, subtaskKeys: any
       {loading ? (
         <LoadingOutlined style={{ margin: '0 10px' }} />
       ) : (
-        <Tooltip title={'批量分配子任务' + (disabled ? '，请进行勾选' : '')} placement={'bottom'}>
-          <UserAddOutlined title={'经办人'} style={{ margin: '0 10px' }} disabled={disabled} />
+        <Tooltip title={'批量分配子任务'} placement={'bottom'}>
+          <UserAddOutlined
+            title={'经办人'}
+            style={{ margin: '0 10px' }}
+            className={
+              disabled &&
+              css`
+                opacity: 0.5;
+                cursor: not-allowed !important;
+              `
+            }
+          />
         </Tooltip>
       )}
     </Popconfirm>
@@ -171,7 +184,7 @@ export default function subtasksAssigneeRender() {
               connector.removeListener('next', handle)
             }
           }, [])
-          return <SubtasksAssigneeComponent disabled={!subtaskKeys.length} subtaskKeys={subtaskKeys}/>
+          return <SubtasksAssigneeComponent disabled={!subtaskKeys.length} subtaskKeys={subtaskKeys} />
         })(elem, {})
 
         const td = domify(`<td></td>`)
