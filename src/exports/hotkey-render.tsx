@@ -107,6 +107,7 @@ function AssignModal({ cb, keys, jiraApi }: any) {
         const values = await form.validateFields()
         if (values) {
           try {
+            setLoading(true)
             await (jiraApi as JiraApiBrowser).setAssignees(
               data
                 .concat(values.assigneeParentTask ? parents : [], values.assigneeSubTask ? subtasks : [])
@@ -122,6 +123,8 @@ function AssignModal({ cb, keys, jiraApi }: any) {
             notification.error({
               message: '分配任务失败'
             })
+          } finally {
+            setLoading(false)
           }
         }
       }}
