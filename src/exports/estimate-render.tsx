@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Form, InputNumber, notification, Spin } from 'antd'
 import { isNotIssueReady, isNotReady, useToken } from '../shared/utils'
 import JiraApiBrowser from '../shared/jira-api-browser'
+import setIntervalCheck from "interval-check";
 
 const EstimateComponent: React.FC<{}> = function () {
   const [form] = Form.useForm()
@@ -56,22 +57,42 @@ const EstimateComponent: React.FC<{}> = function () {
   )
 }
 
+let globalDispose: any
+
 export default function estimateRender() {
-  const alreadyHad =
-    document.querySelector('#ghx-detail-head .ghx-estimate') ||
-    document.querySelector(`#stalker .command-bar .jira-extension-estimate`)
-  if (alreadyHad) {
-    return
+  if (globalDispose) {
+    globalDispose()
   }
 
-  const container = document.querySelector(`#stalker .command-bar`)
-  if (!container) {
-    return
+  const handle = () => {
+    const alreadyHad =
+      document.querySelector('#ghx-detail-head .ghx-estimate') ||
+      document.querySelector(`#stalker .command-bar .jira-extension-estimate`)
+    if (alreadyHad) {
+      return
+    }
+
+    const container = document.querySelector(`#stalker .command-bar`)
+    if (!container) {
+      return
+    }
+
+    const div = document.createElement('div')
+    div.classList.add('jira-extension-estimate')
+    container.appendChild(div)
+
+    return pizza(EstimateComponent)(div, {})
   }
 
-  const div = document.createElement('div')
-  div.classList.add('jira-extension-estimate')
-  container.appendChild(div)
+  const dispose = setIntervalCheck(
+    null,
+    () => {
+      handle()
 
-  return pizza(EstimateComponent)(div, {})
+      return false
+    },
+    500
+  )
+
+  globalDispose = dispose
 }

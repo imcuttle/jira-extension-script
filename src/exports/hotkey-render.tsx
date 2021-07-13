@@ -119,6 +119,11 @@ function AssignModal({ cb, keys, jiraApi }: any) {
             notification.success({
               message: '分配任务成功'
             })
+            cb(true)
+            const btn = document.querySelector('.aui-nav-selected .aui-nav-item') as HTMLElement
+            if (btn) {
+              btn.click()
+            }
           } catch (e) {
             notification.error({
               message: '分配任务失败'
