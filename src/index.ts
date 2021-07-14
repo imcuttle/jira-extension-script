@@ -18,6 +18,15 @@ import swimlaneRender from './exports/swimlane-estimate-render'
 export { default as swimlaneRender } from './exports/swimlane-estimate-render'
 
 export function polyfillRender() {
+  // @see https://github.com/ant-design/ant-design/blob/a51439cbbabef454e35218864fddf0da96e4801e/site/theme/template/Layout/index.jsx#L46
+  window.addEventListener('error', function onError(e) {
+    // Ignore ResizeObserver error
+    if (e.message === 'ResizeObserver loop limit exceeded') {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    }
+  });
+
   estimateRender()
   subtasksAssigneeRender()
   hotkeyRender()

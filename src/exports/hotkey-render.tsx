@@ -8,7 +8,7 @@ import open from '@rcp/util.open'
 import { useJiraApi, useSharedValue, useToken } from '../shared/utils'
 import { Alert, Form, Modal, notification, Spin, Switch, Tooltip, Typography } from 'antd'
 import uniq from 'lodash.uniq'
-import { getIssueKeys } from '../shared/jira-helper'
+import { getIssueKeys, reloadDetailView, reloadIssue } from '../shared/jira-helper'
 import UserSuggest from '../component/user-suggest'
 import JiraApiBrowser from '../shared/jira-api-browser'
 
@@ -108,23 +108,30 @@ function AssignModal({ cb, keys, jiraApi }: any) {
         if (values) {
           try {
             setLoading(true)
-            await (jiraApi as JiraApiBrowser).setAssignees(
-              data
-                .concat(values.assigneeParentTask ? parents : [], values.assigneeSubTask ? subtasks : [])
-                .map((issue) => ({
-                  issueIdOrKey: issue.key,
-                  assignee: { name: values.assignee }
-                }))
+
+            const requestData = data.concat(
+              values.assigneeParentTask ? parents : [],
+              values.assigneeSubTask ? subtasks : []
             )
+
+            await (jiraApi as JiraApiBrowser).setAssignees(
+              requestData.map((issue) => ({
+                issueIdOrKey: issue.key,
+                assignee: { name: values.assignee }
+              }))
+            )
+
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            requestData.forEach((issue) => {
+              reloadIssue(issue.id)
+            })
+            reloadDetailView()
             notification.success({
               message: '分配任务成功'
             })
             cb(true)
-            const btn = document.querySelector('.aui-nav-selected .aui-nav-item') as HTMLElement
-            if (btn) {
-              btn.click()
-            }
           } catch (e) {
+            console.error(e)
             notification.error({
               message: '分配任务失败'
             })

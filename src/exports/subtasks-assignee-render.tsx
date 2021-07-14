@@ -12,6 +12,7 @@ import JiraApiBrowser from '../shared/jira-api-browser'
 import { UserAddOutlined, LoadingOutlined } from '@ant-design/icons'
 import UserSuggest from '../component/user-suggest'
 import useForceUpdate from '../shared/hooks/use-forceupdate'
+import { reloadDetailView } from '../shared/jira-helper'
 
 const getSubKeys = () => {
   const table = document.querySelector('#issuetable, #subtasks .ghx-container .aui')
@@ -91,21 +92,8 @@ const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean; subtaskKeys: any
               assignee: { name: user || null }
             }))
           )
+          reloadDetailView()
           setLoading(false)
-
-          const backlogContainer = document.querySelector('#ghx-rabid')
-          if (backlogContainer) {
-            const itemDom: HTMLDivElement = backlogContainer.querySelector(
-              `[data-issue-key=${JSON.stringify(issueKey)}]`
-            )
-            if (itemDom && itemDom.click) {
-              itemDom.click()
-            }
-          } else {
-            // 详情页
-            JIRA.Issue?.reload?.()
-          }
-
           notification.success({ message: '子任务更新经办人成功' })
         }
       }}

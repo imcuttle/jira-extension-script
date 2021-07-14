@@ -1,4 +1,4 @@
-
+declare var requirejs: any
 declare var JIRA: {
   API?: {
     Projects: {
@@ -19,5 +19,24 @@ declare var JIRA: {
     }
   }
 }
+declare var jQuery: any
+declare var GH: {
+  WorkSelectionController: {
+    getSelectedIssueKeys: () => string[]
+    updateUIAndState: () => void
+  }
+
+  SwimlaneView: {
+    rerenderCell: () => void
+    rerenderCellOfIssue: () => void
+    rerenderIssue: (key: string) => void
+  }
+
+  DetailsView: {
+    reload: () => void
+  }
+}
+
+declare var AJS: any
 
 declare function getJiraRestURL(): string
