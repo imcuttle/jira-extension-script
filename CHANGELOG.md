@@ -1,3 +1,13 @@
+## [1.0.33](https://github.com/余聪/jira-extension-script/compare/v1.0.32...v1.0.33) (2021-07-15)
+
+
+### Bug Fixes
+
+* 提供估分细则 ([121078c](https://github.com/余聪/jira-extension-script/commit/121078cb9b9045ee3ebb6ea7faa5425fb0face51))
+* 提供估分细则 ([ad087bb](https://github.com/余聪/jira-extension-script/commit/ad087bb9c278d01f2bbbb573c6b9068cf7b70a54))
+
+
+
 ## [1.0.32](https://github.com/余聪/jira-extension-script/compare/v1.0.31...v1.0.32) (2021-07-14)
 
 
