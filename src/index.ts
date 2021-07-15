@@ -15,18 +15,19 @@ import hotkeyRender from './exports/hotkey-render'
 export { default as hotkeyRender } from './exports/hotkey-render'
 
 import swimlaneRender from './exports/swimlane-estimate-render'
-import storyPointersRender from "./exports/storypointers-render";
+import storyPointersRender from './exports/storypointers-render'
 export { default as swimlaneRender } from './exports/swimlane-estimate-render'
+
+window.addEventListener('error', function onError(e) {
+  // Ignore ResizeObserver error
+  if (e.message === 'ResizeObserver loop limit exceeded') {
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+})
 
 export function polyfillRender() {
   // @see https://github.com/ant-design/ant-design/blob/a51439cbbabef454e35218864fddf0da96e4801e/site/theme/template/Layout/index.jsx#L46
-  window.addEventListener('error', function onError(e) {
-    // Ignore ResizeObserver error
-    if (e.message === 'ResizeObserver loop limit exceeded') {
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-    }
-  });
 
   estimateRender()
   subtasksAssigneeRender()

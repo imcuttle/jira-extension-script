@@ -22,6 +22,7 @@ const c = p('jira_portal')
 import './style.sass'
 import JiraModalImport from '../modal-import'
 import {isNotReady, useSharedValue, useToken} from '../../shared/utils'
+import FeatureHint from "../feature-hint";
 
 const initialVal = {
   overwriteShortcut: true,
@@ -55,14 +56,16 @@ const JiraPortal: React.FC<{}> = ({}) => {
   return (
     <ConfigProvider locale={zhCN}>
       <div className={c()}>
-        <Button
-          className={c('__btn')}
-          onClick={() => dispatch({ value: { visible: true } })}
-          type={'dashed'}
-          shape={'round'}
-        >
-          Jira 工具
-        </Button>
+        <FeatureHint>
+          <Button
+            className={c('__btn')}
+            onClick={() => dispatch({ value: { visible: true } })}
+            type={'dashed'}
+            shape={'round'}
+          >
+            Jira 工具
+          </Button>
+        </FeatureHint>
 
         <Drawer
           onClose={() =>
