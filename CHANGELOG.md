@@ -1,3 +1,7 @@
+## [1.0.34](https://github.com/余聪/jira-extension-script/compare/v1.0.33...v1.0.34) (2021-07-15)
+
+
+
 ## [1.0.33](https://github.com/余聪/jira-extension-script/compare/v1.0.32...v1.0.33) (2021-07-15)
 
 
