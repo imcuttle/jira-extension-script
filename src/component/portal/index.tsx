@@ -24,7 +24,8 @@ import JiraModalImport from '../modal-import'
 import {isNotReady, useSharedValue, useToken} from '../../shared/utils'
 
 const initialVal = {
-  overwriteShortcut: true
+  overwriteShortcut: true,
+  overwriteStoryPoints: true
 }
 
 const JiraPortal: React.FC<{}> = ({}) => {
@@ -106,11 +107,15 @@ const JiraPortal: React.FC<{}> = ({}) => {
             <Form
               form={settingForm}
               initialValues={setting}
+              labelCol={{ style: { width: 100 } }}
               onFieldsChange={(v, ...a) => {
                 setSetting(settingForm.getFieldsValue())
               }}
             >
               <Form.Item help={'是否覆盖原始的快捷键，如 A'} name={'overwriteShortcut'} label={'快捷键覆盖'} valuePropName={'checked'}>
+                <Switch disabled={!token} />
+              </Form.Item>
+              <Form.Item help={'是否覆盖原始的估分明细'} name={'overwriteStoryPoints'} label={'估分明细覆盖'} valuePropName={'checked'}>
                 <Switch disabled={!token} />
               </Form.Item>
             </Form>

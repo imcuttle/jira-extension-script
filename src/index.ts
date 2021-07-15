@@ -15,6 +15,7 @@ import hotkeyRender from './exports/hotkey-render'
 export { default as hotkeyRender } from './exports/hotkey-render'
 
 import swimlaneRender from './exports/swimlane-estimate-render'
+import storyPointersRender from "./exports/storypointers-render";
 export { default as swimlaneRender } from './exports/swimlane-estimate-render'
 
 export function polyfillRender() {
@@ -31,6 +32,7 @@ export function polyfillRender() {
   subtasksAssigneeRender()
   hotkeyRender()
   swimlaneRender()
+  storyPointersRender()
 }
 
 // dev 环境开了 hot-client 所以 umd 打包 export 有问题，所以用这种方式解决

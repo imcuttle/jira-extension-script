@@ -59,6 +59,18 @@ export default class JiraApiBrowser extends JiraApi {
     })
   }
 
+  async getBacklogData(rapidViewId: number, selectedProjectKey: string) {
+    return this.request({
+      method: 'get',
+      baseURL: url.format({ host: url.parse(this.axios.defaults.baseURL || '').host, pathname: '' }),
+      url: '/rest/greenhopper/1.0/xboard/plan/backlog/data.json',
+      params: {
+        rapidViewId,
+        selectedProjectKey
+      }
+    })
+  }
+
   async querySuggestEpics({
     maxResults = 20,
     hideDone = true,
@@ -196,11 +208,11 @@ export default class JiraApiBrowser extends JiraApi {
     if (response.data) {
       let list = (response.data.fields || []).slice()
       if (response.data.sortedTabs?.length) {
-        response.data.sortedTabs.forEach(tabs => {
+        response.data.sortedTabs.forEach((tabs) => {
           list = list.concat(tabs.fields)
         })
       }
-      console.log('list', list);
+      console.log('list', list)
       return list
     }
     return []

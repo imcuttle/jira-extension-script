@@ -1,6 +1,7 @@
 import lodashGet from 'lodash.get'
 import React, { useRef } from 'react'
 import { EventEmitter } from 'events'
+import { parse } from 'querystring'
 import JiraApiBrowser from './jira-api-browser'
 
 export const isNotReady = () =>
@@ -56,4 +57,8 @@ export function useJiraApi() {
       }),
     [token]
   )
+}
+
+export function useLocationQuery() {
+  return React.useMemo(() => parse(location.search.slice(1)), [location.search])
 }

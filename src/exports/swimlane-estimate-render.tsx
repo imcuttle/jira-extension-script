@@ -9,25 +9,6 @@ import { Tooltip } from 'antd'
 let globalDispose = null
 
 export default function swimlaneRender() {
-  try {
-    const dd = requirejs('jira-agile/rapid/ui/work/work-drag-and-drop')
-    const prevIssueDragStart = dd.issueDragStart
-    // dd.issueDragStart = function (...args) {
-    //   const [e, r] = args
-    //   const a = !!r.item
-    //   const n = jQuery(a ? r.item : this)
-    //   const keys = GH.WorkSelectionController.getSelectedIssueKeys()
-    //   console.log(n, r.item)
-    //
-    //   const res = prevIssueDragStart.apply(this, args)
-    //   dd.initDropZoneOverlay(n)
-    //   return res
-    // }
-    console.log(prevIssueDragStart)
-  } catch (e) {
-    console.error(e)
-  }
-
   if (globalDispose) {
     globalDispose()
   }

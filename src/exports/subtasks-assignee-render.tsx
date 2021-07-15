@@ -45,7 +45,7 @@ const SubtasksAssigneeComponent: React.FC<{ disabled?: boolean; subtaskKeys: any
       let user = null
       if (res.data.fields) {
         if (res.data.fields.assignee) {
-          user = res.data.fields.assignee.key
+          user = res.data.fields.assignee.name
         }
       }
       setUser(user || JIRA?.Users?.LoggedInUser?.userName())
