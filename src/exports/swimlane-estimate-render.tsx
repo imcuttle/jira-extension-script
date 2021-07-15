@@ -46,7 +46,7 @@ export default function swimlaneRender() {
                   <Tooltip placement={'left'} title={`经办人: ${assignee.displayName}`}>
                     <img
                       alt={`经办人: ${assignee.displayName}`}
-                      src={`/secure/useravatar?size=small&ownerId=${assignee.name}`}
+                      src={`/secure/useravatar?size=small&ownerId=${assignee.key || assignee.name}`}
                     />
                   </Tooltip>
                 </span>
