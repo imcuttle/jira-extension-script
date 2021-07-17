@@ -21,7 +21,7 @@ const c = p('jira_portal')
 
 import './style.sass'
 import JiraModalImport from '../modal-import'
-import {isNotReady, useSharedValue, useToken} from '../../shared/utils'
+import {isNotReady, MOD_CHAR, useSharedValue, useToken} from '../../shared/utils'
 import FeatureHint from "../feature-hint";
 
 const initialVal = {
@@ -115,7 +115,12 @@ const JiraPortal: React.FC<{}> = ({}) => {
                 setSetting(settingForm.getFieldsValue())
               }}
             >
-              <Form.Item help={'是否覆盖原始的快捷键，如 A'} name={'overwriteShortcut'} label={'快捷键覆盖'} valuePropName={'checked'}>
+              <Form.Item help={
+                <>
+                  <div>是否使用扩展快捷键</div>
+                  <div>{`如 A / ${MOD_CHAR}+Shift+C`}</div>
+                </>
+              } name={'overwriteShortcut'} label={'快捷键设置'} valuePropName={'checked'}>
                 <Switch disabled={!token} />
               </Form.Item>
               <Form.Item help={'是否覆盖原始的估分明细'} name={'overwriteStoryPoints'} label={'估分明细覆盖'} valuePropName={'checked'}>

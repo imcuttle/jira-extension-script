@@ -4,6 +4,10 @@ import { EventEmitter } from 'events'
 import { parse } from 'querystring'
 import JiraApiBrowser from './jira-api-browser'
 
+export const isMac = /mac/i.test(navigator.appVersion || '')
+
+export const MOD_CHAR = isMac ? '⌘' : 'Ctrl'
+
 export const isNotReady = () =>
   typeof JIRA === 'undefined' ||
   !lodashGet(JIRA, 'Users.LoggedInUser.userName', () => undefined)() ||

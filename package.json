@@ -75,6 +75,7 @@
     "@rcp/util.open": "^1.0.2",
     "antd": "^4.12.2",
     "axios": "^0.21.1",
+    "copy-text-to-clipboard": "^3.0.1",
     "domify": "^1.4.1",
     "github-markdown-css": "^4.0.0",
     "hotkey-chain": "^1.0.0",

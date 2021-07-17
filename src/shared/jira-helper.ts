@@ -4,7 +4,7 @@ import get from 'lodash.get'
 export function getIssueKeys() {
   const elements = document.querySelectorAll(`.ghx-selected[data-issue-key]`)
 
-  const issues = JIRA.Issue.getIssueKey() ? [JIRA.Issue.getIssueKey()] : []
+  const issues = JIRA.Issue?.getIssueKey?.() ? [JIRA.Issue.getIssueKey()] : []
 
   if (elements.length) {
     return uniq(
