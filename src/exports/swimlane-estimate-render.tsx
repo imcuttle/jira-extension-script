@@ -16,11 +16,12 @@ export default function swimlaneRender() {
   const handle = () => {
     const headers = document.querySelectorAll('.ghx-swimlane [data-issue-key].ghx-swimlane-header')
     headers.forEach((header) => {
-      if (header.querySelector('.jira-extension-estimate')) {
+      if (header.querySelector('.jira-extension-swimlane-estimate')) {
         return
       }
+      const bandaid = header.querySelector('.ghx-bandaid')
       const issueKey = header.getAttribute('data-issue-key')
-      const dom = domify('<span class="jira-extension-estimate"></span>')
+      const dom = domify('<span class="jira-extension-swimlane-estimate"></span>')
 
       pizza(() => {
         const jiraApi = useJiraApi()
@@ -62,6 +63,12 @@ export default function swimlaneRender() {
         )
       })(dom, {})
       header.appendChild(dom)
+
+      let marginRight = 14 // base
+      if (bandaid) {
+        marginRight += Math.max(0, (bandaid.clientWidth || 0) - marginRight)
+      }
+
       header.classList.add(css`
         display: flex;
         align-items: center;
@@ -70,9 +77,9 @@ export default function swimlaneRender() {
           flex: 1;
           width: 0;
         }
-        .jira-extension-estimate {
+        .jira-extension-swimlane-estimate {
           padding-left: 5px;
-          margin-right: 14px;
+          margin-right: ${marginRight}px;
           display: flex;
           align-items: center;
 
