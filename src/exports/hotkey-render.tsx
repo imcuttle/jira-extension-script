@@ -8,12 +8,11 @@ import open from '@rcp/util.open'
 import { useJiraApi, useSharedValue, useToken } from '../shared/utils'
 import { Alert, Form, Modal, notification, Spin, Switch, Tooltip, Typography } from 'antd'
 import uniq from 'lodash.uniq'
-import copy from 'copy-text-to-clipboard';
-import * as urlUtils from 'url';
+import copy from 'copy-text-to-clipboard'
+import * as urlUtils from 'url'
 import { getIssueKeys, reloadDetailView, reloadIssue } from '../shared/jira-helper'
 import UserSuggest from '../component/user-suggest'
 import JiraApiBrowser from '../shared/jira-api-browser'
-
 
 const getDom = lazy(() => {
   const div = document.createElement('div')
@@ -229,25 +228,66 @@ function HotKey() {
 
         next()
       })
-      .on('mod+shift+c', (event: KeyboardEvent, next) => {
+      .on('mod+shift+c', (event: any, next) => {
         if (!['TEXTAREA', 'INPUT'].includes(event.target.tagName) && event.target.contentEditable !== true) {
           event.preventDefault()
           const keys = getIssueKeys()
           if (!keys.length) {
             return
           }
-          const msg = keys.map(key => urlUtils.format({
-            ...location,
-            pathname: `/browse/${key}`,
-            search: null,
-            query: {},
-            hash: null
-          })).join('\n')
+          const msg = keys
+            .map((key) =>
+              urlUtils.format({
+                ...location,
+                pathname: `/browse/${key}`,
+                search: null,
+                query: {},
+                hash: null
+              })
+            )
+            .join('\n')
           if (copy(msg)) {
             notification.success({
               message: '复制 issue 链接成功'
             })
           }
+        }
+
+        next()
+      })
+      .on('mod+shift+s', async (event: any, next) => {
+        if (!['TEXTAREA', 'INPUT'].includes(event.target.tagName) && event.target.contentEditable !== true) {
+          event.preventDefault()
+          const keys = getIssueKeys()
+          if (!keys.length) {
+            return
+          }
+          const issuesResponse = await jiraApi.search(`key in (${keys.join(',')})`)
+
+          if (issuesResponse?.data?.issues?.length) {
+            const msg = issuesResponse?.data?.issues
+              .map(
+                (issue) =>
+                  `${issuesResponse?.data?.issues.length > 1 ? '- ' : ''}${issue.fields?.summary} ${urlUtils.format({
+                    ...location,
+                    pathname: `/browse/${issue.key}`,
+                    search: null,
+                    query: {},
+                    hash: null
+                  })}`
+              )
+              .join('\n')
+            if (copy(msg)) {
+              notification.success({
+                message: '复制 issue 分享链接成功'
+              })
+              return
+            }
+          }
+
+          notification.error({
+            message: '复制 issue 分享链接失败'
+          })
         }
 
         next()

@@ -118,7 +118,7 @@ const JiraPortal: React.FC<{}> = ({}) => {
               <Form.Item help={
                 <>
                   <div>是否使用扩展快捷键</div>
-                  <div>{`如 A / ${MOD_CHAR}+Shift+C`}</div>
+                  <div>{`如 A / ${MOD_CHAR}+Shift+C / ${MOD_CHAR}+Shift+S`}</div>
                 </>
               } name={'overwriteShortcut'} label={'快捷键设置'} valuePropName={'checked'}>
                 <Switch disabled={!token} />
