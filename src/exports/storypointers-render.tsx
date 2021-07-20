@@ -66,7 +66,7 @@ const StoryPointerComponent: React.FC<{ sprintId: number; originShow: any }> = f
           // customfield_10704 => 前端工作量
           let frontPoints: number = issue.fields.customfield_10704
           if (frontPoints == null && issue.fields.summary) {
-            if (/[(（]?(\d+)\s*\+\s*\d+[)）]?\s*$/.test(issue.fields.summary)) {
+            if (/[(（]?([\d.]+)\s*\+\s*[\d.]+[)）]?\s*$/.test(issue.fields.summary)) {
               frontPoints = Number(RegExp.$1)
             }
           }
