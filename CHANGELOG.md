@@ -1,3 +1,12 @@
+## [1.0.38](https://github.com/余聪/jira-extension-script/compare/v1.0.37...v1.0.38) (2021-07-20)
+
+
+### Bug Fixes
+
+* storypointers-render.tsx ([8945e80](https://github.com/余聪/jira-extension-script/commit/8945e8053af0556d5d1d769d386741772c54e235))
+
+
+
 ## [1.0.37](https://github.com/余聪/jira-extension-script/compare/v1.0.36...v1.0.37) (2021-07-19)
 
 
