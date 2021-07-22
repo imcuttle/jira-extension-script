@@ -54,7 +54,7 @@ export default function parseHtmlTreeNode(
   html: string,
 ): false | TreeNode {
   const docElement = new DOMParser().parseFromString(html, 'text/html')
-  const ulElements = docElement.querySelectorAll('[data-shimo-docs] > ul')
+  const ulElements = docElement.querySelectorAll('[data-shimo-docs] > ul, body > ul')
   if (!ulElements.length) {
     // 不匹配石墨
     return false

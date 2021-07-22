@@ -100,7 +100,7 @@ const JiraPortal: React.FC<{}> = ({}) => {
             </Typography.Paragraph>
             <Typography.Paragraph>
               <Button disabled={!token} type={'primary'} onClick={() => dispatch({ type: 'setType', value: 'import' })}>
-                石墨 / Markdown 导入
+                石墨 / Confluence / Markdown 导入
               </Button>
             </Typography.Paragraph>
 
