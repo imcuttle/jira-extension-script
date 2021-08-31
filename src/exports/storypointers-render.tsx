@@ -74,13 +74,26 @@ const StoryPointerComponent: React.FC<{ sprintId: number; originShow: any }> = f
 
           asyncTasks.push(async () => {
             if (frontPoints) {
-              const otherAssignee = (await getSubTasks(issue)).find(
+              const subTasks = await getSubTasks(issue)
+              const otherAssigneeVo = subTasks?.find(
                 (subTask) =>
                   subTask.fields?.assignee?.name && subTask.fields?.assignee?.name !== issue.fields?.assignee?.name
-              )?.fields?.assignee?.name
+              )?.fields?.assignee
+
+              const otherAssignee = otherAssigneeVo?.name
               if (!otherAssignee) {
                 storyPointsMap[assignee] += estimateStatistic
               } else {
+                const notExist = !data.find((ass) => ass?.assignee?.name === otherAssignee)
+                if (notExist) {
+                  data.push({
+                    key: otherAssignee,
+                    assignee: otherAssigneeVo,
+                    issueCount: '-'
+                  })
+                }
+                // data
+
                 storyPointsMap[otherAssignee] = storyPointsMap[otherAssignee] || 0
                 const backPoints = estimateStatistic - frontPoints
                 if (backPoints >= frontPoints) {
@@ -169,7 +182,9 @@ const StoryPointerComponent: React.FC<{ sprintId: number; originShow: any }> = f
               let totalStoryPoints = 0
 
               pageData.forEach(({ issueCount, assignee }) => {
-                totalIssueCount += issueCount
+                if (!isNaN(issueCount)) {
+                  totalIssueCount += issueCount
+                }
                 totalStoryPoints += storyPointsMap[assignee?.name] || 0
               })
 
