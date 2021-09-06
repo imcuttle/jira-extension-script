@@ -3,7 +3,7 @@ import React from 'react'
 import { Popover, Tooltip, Typography } from 'antd'
 import { css } from '@emotion/css'
 
-export default function FeatureHint({ children, uniqKey = '1' }: any) {
+export default function FeatureHint({ children, uniqKey = '2' }: any) {
   const [isFirst, setIsFirst] = useSharedValue(`jira-extension-feature-hint:${uniqKey}`, true)
 
   if (isFirst) {
@@ -22,11 +22,8 @@ export default function FeatureHint({ children, uniqKey = '1' }: any) {
                 margin-bottom: 0;
               `}
             >
-              <li><Typography.Text type={'danger'}>Mod + Shift + C 负责选中 issue 链接</Typography.Text></li>
-              <li>批量设置经办人</li>
-              <li>批量设置子任务经办人</li>
-              <li>Active Sprint Kanban 展示经办人 & 分值</li>
-              <li>估分分值明细详细计算</li>
+              <li>批量导入支持公共描述</li>
+              <li>批量导入支持统一 Issue 前缀</li>
             </ol>
           </>
         }

@@ -21,7 +21,7 @@ const StoryPointerComponent: React.FC<{ sprintId: number; originShow: any }> = f
   const [loading, setLoading] = React.useState(false)
 
   const click = usePersistFn(async () => {
-    if (!setting.overwriteStoryPoints) {
+    if (originShow && !setting.overwriteStoryPoints) {
       return originShow()
     }
 
@@ -217,7 +217,7 @@ const StoryPointerComponent: React.FC<{ sprintId: number; originShow: any }> = f
   }
 
   return (
-    <Tooltip title={'查看已分配工作概要'} placement={'bottom'} getPopupContainer={(node) => node.parentElement}>
+    <Tooltip title={'查看该组工作概要'} placement={'bottom'} getPopupContainer={(node) => node.parentElement}>
       <Button
         className={css`
           height: 20px;
@@ -261,6 +261,14 @@ export default function storyPointersRender() {
         trigger.style.display = 'none'
         const sprintId = Number(header.dataset.sprintId)
         pizza(StoryPointerComponent)(dom, { sprintId, originShow: () => trigger.click() })
+      } else {
+        const workStats = header.querySelector('.ghx-assigned-work-stats')
+        if (workStats && !workStats.querySelector('.jira-extension-story-pointers')) {
+          const dom = domify(`<span class="jira-extension-story-pointers"></span>`)
+          workStats.appendChild(dom)
+          const sprintId = Number(header.dataset.sprintId)
+          pizza(StoryPointerComponent)(dom, { sprintId })
+        }
       }
     })
   }

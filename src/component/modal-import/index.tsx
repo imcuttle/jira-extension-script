@@ -76,12 +76,9 @@ const JiraModalImport = React.forwardRef<
     [token]
   )
   const [fields, setFields] = React.useState<Array<{ id: string }>>([])
-  const queryFields = React.useCallback(
-    () => {
-      return jiraApi.queryFields()
-    },
-    [jiraApi, JIRA.API.Projects.getCurrentProjectKey()]
-  )
+  const queryFields = React.useCallback(() => {
+    return jiraApi.queryFields()
+  }, [jiraApi, JIRA.API.Projects.getCurrentProjectKey()])
 
   React.useEffect(() => {
     if (props.visible && JIRA.API.Projects.getCurrentProjectKey()) {
@@ -175,25 +172,33 @@ const JiraModalImport = React.forwardRef<
       confirmLoading={!!loading}
       onOk={async (e) => {
         const mdast = importPreviewRef.current?.mdast
-        if (mdast) {
-        }
 
         const nodes = mdastToTreeNodes(mdast)
-        const getReqBody = (nodes: TreeNode[]) => {
-          const rawBody = form.getFieldsValue()
+        const getReqBody = (nodes: TreeNode[], type: 'issue' | 'subTask') => {
+          const { issuePrefix, ...rawBody } = form.getFieldsValue() || {}
+          const commonDescription = markdown2confluence(rawBody.description || '')
           return {
             ...rawBody,
             components: rawBody.components?.map((id) => ({ id })),
-            tasksBody: nodes.map((node) => ({
-              ...node.data.params,
-              summary: node.value,
-              description: treeNodesToConfluence(node.children)
-            }))
+            tasksBody: nodes.map((node) => {
+              const selfDescription = treeNodesToConfluence(node.children)
+              return {
+                ...node.data.params,
+                summary: type === 'issue' ? [node.value && issuePrefix ? issuePrefix : null, node.value].filter(Boolean).join('') : node.value,
+                description: [
+                  commonDescription,
+                  selfDescription && commonDescription && '\n======== 子任务如下 =========\n',
+                  selfDescription
+                ]
+                  .filter(Boolean)
+                  .join('\n')
+              }
+            })
           }
         }
 
         setLoading(true)
-        const parentRes = await jiraApi.createIssues(getReqBody(nodes), { toastSuccess: false })
+        const parentRes = await jiraApi.createIssues(getReqBody(nodes, 'issue'), { toastSuccess: false })
 
         if (parentRes.data.issues && parentRes.data.issues.length) {
           const subTasks = []
@@ -232,7 +237,7 @@ const JiraModalImport = React.forwardRef<
           }
 
           if (subTasks.length) {
-            const subTasksRes = await jiraApi.createIssues(getReqBody(subTasks), { toastSuccess: false })
+            const subTasksRes = await jiraApi.createIssues(getReqBody(subTasks, 'subTask'), { toastSuccess: false })
             issues = parentRes.data.issues.concat(subTasksRes.data.issues || [])
           }
 
@@ -408,6 +413,18 @@ const JiraModalImport = React.forwardRef<
                         )
                       )
                     }}
+                  </Form.Item>
+                </Col>
+              )}
+              <Col span={8}>
+                <Form.Item name={'issuePrefix'} label={'Issue 前缀'}>
+                  <Input placeholder={'一般用于标志一组 Issue，如【xx开发】'} />
+                </Form.Item>
+              </Col>
+              {hasKey('description') && (
+                <Col span={24}>
+                  <Form.Item name={'description'} label={'描述'}>
+                    <Input.TextArea rows={3} placeholder={'支持书写 markdown 语法，将会转换为 confluence 格式'} />
                   </Form.Item>
                 </Col>
               )}
