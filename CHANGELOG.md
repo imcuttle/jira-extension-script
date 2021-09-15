@@ -1,3 +1,12 @@
+## [1.0.42](https://github.com/余聪/jira-extension-script/compare/v1.0.41...v1.0.42) (2021-09-15)
+
+
+### Bug Fixes
+
+* summary has newline ([722a541](https://github.com/余聪/jira-extension-script/commit/722a54181eae5465e760c9f332ee0f828cf48be5))
+
+
+
 ## [1.0.41](https://github.com/余聪/jira-extension-script/compare/v1.0.40...v1.0.41) (2021-09-06)
 
 
