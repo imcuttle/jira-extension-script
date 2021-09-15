@@ -184,7 +184,11 @@ const JiraModalImport = React.forwardRef<
               const selfDescription = treeNodesToConfluence(node.children)
               return {
                 ...node.data.params,
-                summary: type === 'issue' ? [node.value && issuePrefix ? issuePrefix : null, node.value].filter(Boolean).join('') : node.value,
+                summary: (
+                  (type === 'issue'
+                    ? [node.value && issuePrefix ? issuePrefix : null, node.value].filter(Boolean).join('')
+                    : node.value) || ''
+                ).replace(/\n/g, '    '),
                 description: [
                   commonDescription,
                   selfDescription && commonDescription && '\n======== 子任务如下 =========\n',
